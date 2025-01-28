@@ -32,11 +32,23 @@ func _initialized() -> void:
 	registry_idx = registry_count
 	if registry_idx == 0:
 		instance = self
-		if subregistry_paths.size() == 0: 
-			subregistry_paths.append("res://core/registry/")
-			subregistry_paths.append("res://src/registry/")
+		_pre_setup_main_registry_subregistries()
+		_setup_main_registry_subregistries()
+		_post_setup_main_registry_subregistries()
 	get_mod_folder_paths()
 	set_process(false)
+
+
+func _pre_setup_main_registry_subregistries() -> void: return
+
+## The user/dev may insert subregistry paths before given the default settings with the export variable, or they can override these functions in an extended script.
+func _setup_main_registry_subregistries() -> void:
+	if subregistry_paths.size() == 0: 
+		subregistry_paths.append("res://core/registry/")
+		subregistry_paths.append("res://src/registry/")
+	return
+
+func _post_setup_main_registry_subregistries() -> void: return
 
 
 func _start_registry() -> Error:
@@ -113,7 +125,7 @@ func create_subregistries_from_folder(folder_path:String, exclude_file_paths:Arr
 		if exclude_file_paths.has(filepath): continue;
 		var r = await create_subregistry(filepath); 
 		if r: 
-			if new_registries.has(r):
+			if new_registries.has(r) or registries.values().has(r):
 				chat(str("created existing registry, ignoring: " + folder_path), Text.COLORS.yellow)
 			else:
 				new_registries.append(r)
