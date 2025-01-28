@@ -1,19 +1,19 @@
 { 
 	"lib" : 
 		{
-			"name" : "g_libs",
+			"name" : "g_math",
 			"type" : "godot",
 
 			"date_created" : "jan-28-2025",
-			"source" : "https://github.com/gammasynth/g_libs",
-			"origin" : "https://github.com/gammasynth/g_libs/archive/refs/heads/main.zip",
+			"source" : "",
+			"origin" : "",
 
 			"owner" : "Gammasynth",
 			"website" : "https://gammasynth.com",
 			"copyright" : "Copyright Gammasynth 2025",
 			"license" : "All rights reserved",
 
-			"is_sublibrary" : false,
+			"is_sublibrary" : true,
 			"useable_zipped" : false,
 
 			"executable_path" : "",

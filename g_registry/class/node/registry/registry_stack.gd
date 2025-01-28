@@ -41,11 +41,49 @@ func _initialized() -> void:
 
 func _pre_setup_main_registry_subregistries() -> void: return
 
+func check_library_for_registries(folder_path:String) -> void:
+	var library_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
+	
+	if library_folders.has("registry"): subregistry_paths.append(str(folder_path + "registry/"))
+	
+	for subfolder:String in library_folders:
+		var subfolder_path:String = str(folder_path + subfolder + "/")
+		if is_folder_library(subfolder_path):
+			check_library_for_registries(subfolder_path)
+
+func is_folder_library(folder_path:String) -> bool:
+	var folder_is_library: bool = false
+	
+	var file_names: Array[String] = File.get_all_filepaths_from_directory(folder_path)
+	for file_name:String in file_names:
+		if file_name == "lib.json":
+			folder_is_library = true
+			break
+	
+	return folder_is_library
+
 ## The user/dev may insert subregistry paths before given the default settings with the export variable, or they can override these functions in an extended script.
 func _setup_main_registry_subregistries() -> void:
 	if subregistry_paths.size() == 0: 
-		subregistry_paths.append("res://core/registry/")
-		subregistry_paths.append("res://src/registry/")
+		var root_folders: Array[String] = File.get_all_directories_from_directory("res://")
+		
+		for folder:String in root_folders:
+			var folder_path:String = str("res://" + folder + "/")
+			if is_folder_library(folder_path):
+				check_library_for_registries(folder_path)
+		
+		if root_folders.has("lib"):
+			check_library_for_registries("res://lib/")
+		
+		
+		if root_folders.has("registry"): subregistry_paths.append("res://registry/")
+		
+		if root_folders.has("src"): 
+			var src_folders: Array[String] = File.get_all_directories_from_directory("res://src/")
+			if src_folders.has("registry"): subregistry_paths.append("res://src/registry/")
+		
+		#subregistry_paths.append("res://core/registry/")
+		#subregistry_paths.append("res://src/registry/")
 	return
 
 func _post_setup_main_registry_subregistries() -> void: return
