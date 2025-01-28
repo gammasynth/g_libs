@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://tk814hknm3y0"]
+
+[ext_resource type="Script" path="res://g_libs/g_db/scene/debug/debug_database_window.gd" id="1_a0muc"]
+[ext_resource type="PackedScene" uid="uid://d0123hgku2okm" path="res://g_libs/g_db/scene/prefab/ui/debug/debug_database.tscn" id="2_afeke"]
+
+[node name="DebugDatabaseWindow" type="Window"]
+size = Vector2i(250, 250)
+script = ExtResource("1_a0muc")
+
+[node name="RefreshTimer" type="Timer" parent="."]
+wait_time = 0.25
+one_shot = true
+
+[node name="DebugDatabase" parent="." instance=ExtResource("2_afeke")]
+script = null
+
+[connection signal="timeout" from="RefreshTimer" to="." method="_on_refresh_timer_timeout"]

@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://cpvkx6diurmom"]
+
+[ext_resource type="Script" path="res://g_libs/g_db/scene/prefab/ui/debug/debug_database_graph.gd" id="1_2vhsd"]
+[ext_resource type="Script" path="res://g_libs/g_db/class/node/canvas_item/control/tree/debug_database_tree.gd" id="2_yc87n"]
+
+[node name="DebugDatabaseGraph" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("1_2vhsd")
+cam_speed = null
+metadata/_tab_index = 0
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MenuBar" type="MenuBar" parent="VBox"]
+layout_mode = 2
+
+[node name="Graph Info" type="PopupMenu" parent="VBox/MenuBar"]
+hide_on_checkable_item_selection = false
+item_count = 1
+item_0/text = "details"
+item_0/checkable = 2
+item_0/checked = true
+
+[node name="HSplit" type="HSplitContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DebugDatabaseTree" type="Tree" parent="VBox/HSplit/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_neighbor_left = NodePath("../../VPC")
+focus_neighbor_right = NodePath("../../VPC")
+focus_next = NodePath("../../VPC")
+focus_previous = NodePath("../../VPC")
+script = ExtResource("2_yc87n")
+
+[node name="VPC" type="SubViewportContainer" parent="VBox/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
+focus_mode = 2
+stretch = true
+
+[node name="VP" type="SubViewport" parent="VBox/HSplit/VPC"]
+handle_input_locally = false
+size = Vector2i(2, 2)
+render_target_update_mode = 4
+
+[node name="Canvas" type="Node2D" parent="VBox/HSplit/VPC/VP"]
+z_index = 10
+
+[node name="Camera2D" type="Camera2D" parent="VBox/HSplit/VPC/VP/Canvas"]
+
+[connection signal="id_pressed" from="VBox/MenuBar/Graph Info" to="." method="_on_graph_info_id_pressed"]
