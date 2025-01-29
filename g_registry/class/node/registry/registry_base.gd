@@ -11,15 +11,13 @@ var registry_path:String = REGISTRY_SCRIPT_PATH
 @export var boot_load:bool = false
 
 
-func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
+func _init(_name:String="RegistryBase", _key:Variant=_name) -> void:
 	
-	if _name == "NODE_OBJ":
+	if _name == "RegistryBase":
 		if not name.is_empty():
 			_name = name
 			_key = _name
 	
-	if _name != "NODE_OBJ":
-		name = _name
 	
 	name = _name
 	
@@ -30,7 +28,7 @@ func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
 func _initialized() -> void: return
 
 
-func start() -> Error:
+func _start() -> Error:
 	assert(name is StringName)
 	if debug: 
 		print(" ")
@@ -67,7 +65,7 @@ func boot() -> Error:
 
 func _boot_registry() -> Error:
 	# override this function to set name and what directories to load files from for this registry
-	name = "Registry"
+	if name == "RegistryBase": warn("un-named registry!"); db.name = "Un-Named Registry"
 	directories_to_load = []
 	return OK
 

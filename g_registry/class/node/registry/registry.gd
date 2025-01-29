@@ -41,7 +41,7 @@ static func search_for_registry(by_name:String, in_data:Dictionary, recursive:bo
 		var value = in_data[key]
 		
 		if value is Registry:
-			if value.registry_name == by_name: return value
+			if value.name == by_name: return value
 			
 			if value.subregistries.size() > 0 and recursive:
 				var found:Registry = search_for_registry(by_name, value.data, true)
@@ -51,7 +51,7 @@ static func search_for_registry(by_name:String, in_data:Dictionary, recursive:bo
 static func get_registry(by_name:String, recursive:bool=true) -> Registry:
 	for r_key in registries:
 		var r: Registry = registries[r_key]
-		if r.registry_name == by_name: return r
+		if r.name == by_name: return r
 		
 		if recursive:
 			var found: Registry = search_for_registry(by_name, r.data, recursive); if found: return found;

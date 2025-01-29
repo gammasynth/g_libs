@@ -59,6 +59,43 @@ func _clean_functional_tags_from_file_name(file_name:String) -> String:
 	return file_name
 
 
+func check_folder_for_folder(folder_path:String, target_folder_name:String, action:Callable, recursive:bool = false) -> void:
+	var library_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
+	
+	#if library_folders.has(target_folder_name): action.call(str(folder_path + target_folder_name + "/"))
+	for subfolder:String in library_folders:
+		if subfolder.begins_with(target_folder_name): action.call(str(folder_path + subfolder + "/"))
+	
+	if recursive:
+		for subfolder:String in library_folders:
+			var subfolder_path:String = str(folder_path + subfolder + "/")
+			check_folder_for_folder(subfolder_path, target_folder_name, action, true)
+
+func check_library_for_folder(folder_path:String, target_folder_name:String, action:Callable, recursive:bool = false) -> void:
+	var library_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
+	
+	#if library_folders.has(target_folder_name): action.call(str(folder_path + target_folder_name + "/"))
+	for subfolder:String in library_folders:
+		if subfolder.begins_with(target_folder_name): action.call(str(folder_path + subfolder + "/"))
+	
+	if recursive:
+		for subfolder:String in library_folders:
+			var subfolder_path:String = str(folder_path + subfolder + "/")
+			if is_folder_library(subfolder_path):
+				check_library_for_folder(subfolder_path, target_folder_name, action, true)
+
+func is_folder_library(folder_path:String) -> bool:
+	var folder_is_library: bool = false
+	
+	var file_names: Array[String] = File.get_all_filepaths_from_directory(folder_path)
+	for file_name:String in file_names:
+		if file_name == "lib.json":
+			folder_is_library = true
+			break
+	
+	return folder_is_library
+
+
 func finish_load() -> bool:
 	chat("Load finished.")
 	load_is_finished = true
