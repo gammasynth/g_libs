@@ -1,5 +1,7 @@
 class_name Info
 
+static func interpret_lib_json(_info_data: Dictionary) -> LibJSON:
+	return LibJSON.new(_info_data)
 
 static func get_script_name(value:Variant) -> String:
 	if not value: return "NIL"

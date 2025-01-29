@@ -6,11 +6,11 @@ static var instance:Registry=null;
 
 @export var subregistry_paths: Array[String] = []
 
-## if all registries within a running app exist as children of the first Registry made, they can be accessed globally from registries.
-static var registries = {}:
-	get: 
-		if instance and is_instance_valid(instance): return instance.data
-		return {}
+
+static var registries = {}
+	#get: 
+		#if instance and is_instance_valid(instance): return instance.data
+		#return {}
 
 ## global counter indexing of all registries in app
 var registry_idx:int = -1
@@ -26,6 +26,7 @@ var subregistries = {}:
 
 var booted_subregistries:int = 0
 
+@export var exclude_subregistry_names: Array[String] = []
 
 func _initialized() -> void:
 	registry_count += 1
@@ -35,11 +36,13 @@ func _initialized() -> void:
 		_setup_main_registry_subregistries()
 	get_mod_folder_paths()
 	set_process(false)
+	
+	if instance != self and not registries.has(name): registries.get_or_add(name, self)
 
 
 
-func check_library_for_registries(folder_path:String, recursive:bool = false) -> void:
-	check_library_for_folder(folder_path, "registry", (func(n): subregistry_paths.append(n)), recursive)
+func check_library_for_registries(folder_path:String, recursive:bool = false, registry_folder_name:String="registry") -> void:
+	check_library_for_folder(folder_path, registry_folder_name, (func(n): subregistry_paths.append(n)), recursive)
 
 
 
@@ -132,7 +135,7 @@ func create_registries_recursive(folder_path:String) -> Error:
 	return OK
 
 
-func create_subregistries_from_folder(folder_path:String, exclude_file_paths:Array[String]=[]) -> Array[Registry]:
+func create_subregistries_from_folder(folder_path:String, exclude_file_paths:Array[String]=exclude_subregistry_names) -> Array[Registry]:
 	var new_registries: Array[Registry] = []
 	var all_filepaths = File.get_all_filepaths_from_directory(folder_path, "", true)
 	var main_subregistry_path: String = str(folder_path + File.get_folder(folder_path) + ".gd")
@@ -156,12 +159,21 @@ func _get_existing_subregistry(_subregistry_name:String, _from_database:Dictiona
 func create_subregistry(script_path:String=REGISTRY_SCRIPT_PATH) -> Registry:
 	if script_path == registry_path: return self
 	var subregistry_name: String = File.get_file_name_from_file_path(script_path)
+	if exclude_subregistry_names.has(subregistry_name): return null
+	
 	var existing:Registry = await _get_existing_subregistry(subregistry_name, data, true)
-	if existing: return existing
+	if existing: return null
 	chat(str("loading registry file: " + script_path))
 	
 	var script: GDScript = File.load_gdscript_file(script_path)
-	var subregistry : Registry = script.new(subregistry_name)
+	
+	var loaded_script: Variant = script.new()
+	if loaded_script is not Registry:
+		warnd("NOT A REGISTRY SCRIPT! OTHER OBJ"); return null
+	loaded_script.queue_free()
+	loaded_script = script.new(subregistry_name)
+	
+	var subregistry : Registry = loaded_script
 	
 	#add_child(subregistry, true)
 	subregistry.registry_path = script_path

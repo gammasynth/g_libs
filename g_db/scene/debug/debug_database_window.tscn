@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://tk814hknm3y0"]
 
-[ext_resource type="Script" path="res://g_libs/g_db/scene/debug/debug_database_window.gd" id="1_a0muc"]
-[ext_resource type="PackedScene" uid="uid://d0123hgku2okm" path="res://g_libs/g_db/scene/prefab/ui/debug/debug_database.tscn" id="2_afeke"]
+[ext_resource type="Script" path="res://lib/g_libs/g_db/scene/debug/debug_database_window.gd" id="1_a0muc"]
+[ext_resource type="PackedScene" uid="uid://d0123hgku2okm" path="res://lib/g_libs/g_db/scene/prefab/ui/debug/debug_database.tscn" id="2_afeke"]
 
 [node name="DebugDatabaseWindow" type="Window"]
 size = Vector2i(250, 250)

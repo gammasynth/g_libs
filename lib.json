@@ -8,6 +8,8 @@
 			"source" : "https://github.com/gammasynth/g_libs",
 			"origin" : "https://github.com/gammasynth/g_libs/archive/refs/heads/main.zip",
 
+			"dependencies" : "",
+
 			"owner" : "Gammasynth",
 			"website" : "https://gammasynth.com",
 			"copyright" : "Copyright Gammasynth 2025",

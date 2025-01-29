@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://m3kueymj6sg8"]
 
-[ext_resource type="Script" path="res://g_libs/g_db/scene/prefab/ui/debug/instance_visualizer_control.gd" id="1_5edi0"]
+[ext_resource type="Script" path="res://lib/g_libs/g_db/scene/prefab/ui/debug/instance_visualizer_control.gd" id="1_5edi0"]
 
 [node name="InstanceVisualizerControl" type="Control"]
 layout_mode = 3

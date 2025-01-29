@@ -8,6 +8,8 @@
 			"source" : "",
 			"origin" : "",
 
+			"dependencies" : ["g_libs", "g_make", "g_file", "g_registry"],
+
 			"owner" : "Gammasynth",
 			"website" : "https://gammasynth.com",
 			"copyright" : "Copyright Gammasynth 2025",

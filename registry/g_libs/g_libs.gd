@@ -2,6 +2,7 @@ extends Registry
 
 func _gather_subregistry_paths() -> Error:
 	#subregistry_paths.append("res://src/registry/entities/items.gd")
+	#exclude_subregistry_names.append("debug")
 	check_library_for_registries("res://g_libs/", true)
 	return OK
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d0123hgku2okm"]
 
-[ext_resource type="Script" path="res://g_libs/g_db/scene/prefab/ui/debug/debug_database.gd" id="1_wrd28"]
+[ext_resource type="Script" path="res://lib/g_libs/g_db/scene/prefab/ui/debug/debug_database.gd" id="1_wrd28"]
 
 [node name="DebugDatabase" type="Control"]
 layout_mode = 3
