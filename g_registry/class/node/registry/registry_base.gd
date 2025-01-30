@@ -30,9 +30,8 @@ func _initialized() -> void: return
 
 func _start() -> Error:
 	assert(name is StringName)
-	if debug: 
-		print(" ")
-		chat("Starting Registry...", Text.COLORS.white)
+	chat(" ")
+	chat("Starting Registry...", Text.COLORS.white)
 	
 	var err = OK
 	err = await _start_registry()

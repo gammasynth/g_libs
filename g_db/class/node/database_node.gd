@@ -29,6 +29,10 @@ var parent_node_is_database: bool = false
 var parent_database_node: Node = null
 var is_nested_database : bool = false
 
+
+func _create_database(params:Array=[name]) -> Database:
+	return Database.new.callv(params)
+
 #region Godot Node Initialization and SceneTree Readying
 func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
 	
@@ -40,6 +44,8 @@ func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
 	if _name != "NODE_OBJ":
 		name = _name
 	
+	db = _create_database()
+	if db.is_origin_instance: print(str(name + " IS ORIGIN"))
 	db.key = _key
 	
 	db.name_changed.connect(func(n1, _n2): name = n1)

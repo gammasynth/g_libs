@@ -11,7 +11,8 @@ class_name RefInstance
 
 #region Instance Properties
 
-static var origin_instance: RefInstance
+static var origin_instance: RefInstance = null
+var is_origin_instance: bool = false
 
 signal started
 
@@ -55,7 +56,7 @@ func _get_parent_instance() -> RefInstance: return parent_instance
 
 
 func _init(_name:String="OBJ", _key:Variant=_name) -> void:
-	if not origin_instance: origin_instance = self
+	if origin_instance == null: origin_instance = self; is_origin_instance = true
 	
 	name = _name
 	key = _key
@@ -116,6 +117,7 @@ func warn(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:b
 	var color = Text.COLORS.orange; if is_error and err == ERR_PRINTER_ON_FIRE: color = Text.COLORS.red
 	
 	if err == ERR_PRINTER_ON_FIRE: err = OK
+	if err == OK and not force: is_error = false
 	
 	if is_error: text = str("Error " + text)
 	else: 
@@ -127,11 +129,9 @@ func warn(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:b
 				push_error(text)
 			elif err != OK:
 				push_warning(text)
-			else:
-				chat(text, color, force)
 		else:
 			chat(text, color, force)
-	if can_break: breakpoint
+	if is_error and can_break: breakpoint
 
 ## [warnd] will do a warning only during [deep_debug].
 func warnd(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:bool=true, can_break:bool=false) -> void: if deep_debug: warn(text, err, is_error, can_break)

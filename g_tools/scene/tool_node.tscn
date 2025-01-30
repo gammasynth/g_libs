@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://bi888t1r21bnb"]
 
-[ext_resource type="Script" path="res://core/tool/script_tool.gd" id="1_jrw37"]
-[ext_resource type="Script" path="res://core/tool/shader_tool.gd" id="2_o32pp"]
-[ext_resource type="Script" path="res://core/tool/resource_tool.gd" id="3_5yp2k"]
+[ext_resource type="Script" path="res://lib/g_libs/g_tools/class/node/script_tool.gd" id="1_jrw37"]
+[ext_resource type="Script" path="res://lib/g_libs/g_tools/class/node/shader_tool.gd" id="2_o32pp"]
+[ext_resource type="Script" path="res://lib/g_libs/g_tools/class/node/resource_tool.gd" id="3_5yp2k"]
 
 [node name="ToolNode" type="Node"]
 
