@@ -40,6 +40,15 @@ signal name_changed(new_name: String, old_name: String)
 
 var name : String = "OBJ": set = set_name
 func set_name(_name) -> void: var old = name; name = _name; name_changed.emit(_name, old)
+
+var persona: String:
+	get:
+		if has_persona: return persona
+		return name
+	set(s):
+		has_persona = true
+		persona = s
+var has_persona: bool = false
 #endregion
 
 #region Instance Key
@@ -95,7 +104,7 @@ func _finish_tick() -> Error: return OK
 func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok:bool=false) -> Variant:
 	if not debug and not force: return
 	
-	text = str(name + " | " + text)
+	text = str(persona + " | " + text)
 	
 	if clr is int and clr == -1: print(text)
 	else: print_rich(Text.color(text, clr))
@@ -126,9 +135,9 @@ func warn(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:b
 	if force: 
 		if can_break:
 			if is_error:
-				push_error(text)
+				push_error(str(name + " | ERROR | " + text))
 			elif err != OK:
-				push_warning(text)
+				push_warning(str(name + " | WARNING | " + text))
 		else:
 			chat(text, color, force)
 	if is_error and can_break: breakpoint

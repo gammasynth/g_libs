@@ -14,7 +14,8 @@ static func has_files(folder_path:String) -> bool:
 
 ## Get a FolderName from a Path.
 static func get_folder(path:String, full_path:bool=false) -> String:
-	if FileAccess.file_exists(path):
+	#if FileAccess.file_exists(path):# we wont use this because what if its a file path but not a currently existing file
+	if not path.get_extension().is_empty():# we will consider a path with a ".extension" of any kind to be a "file"
 		var file_name = FileUtil.get_file_name_from_file_path(path, true)
 		path = path.left(path.length() - file_name.length())
 	var folder_name:String = path; 
