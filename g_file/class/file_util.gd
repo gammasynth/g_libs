@@ -216,7 +216,7 @@ static func save_text_file(file_text:String, file_path:String, passkey:String = 
 	file.store_string(file_text)
 	#file.close()
 	if dire: print(error_string(FileAccess.get_open_error()))
-	print("saved file.")
+	if dire: print("saved file.")
 	return OK
 #endregion
 
