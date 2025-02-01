@@ -53,7 +53,28 @@ static func text_label(label_text:String, label_name:String="RichTextLabel", par
 	
 	return label
 
+static func fade_delete(node:CanvasItem, duration:float = 1.0) -> void:
+	if not node or not is_instance_valid(node): 
+		push_error("fade_delete(): node is already null or invalid instance!")
+		return
+	
+	disable_control(node)
+	var tween: Tween = node.create_tween().set_parallel()
+	tween.tween_property(node, "modulate", Color(0.0, 0.0, 0.0, 0.0), duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(node.queue_free).set_delay(duration)
 
+
+static func disable_control(node:Control, recursive:bool=true) -> void:
+	if not node or not is_instance_valid(node): 
+		push_error("disable_control(): node is null or invalid instance!")
+		return
+	
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE; node.focus_mode = Control.FOCUS_NONE
+	
+	if recursive:
+		for child in node.get_children():
+			if not child or not is_instance_valid(child): continue
+			if child is Control: disable_control(child)
 
 static func clear_children(node:Node, excluding_children:Array[Node]=[]) -> void:
 	for child in node.get_children():

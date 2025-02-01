@@ -111,8 +111,8 @@ func boot_finished() -> Error:
 	return err
 
 func _notify_loader_of_worker() -> Error:
-	if not loading_tracker: return OK
-	loading_tracker.connected_workers += 1
+	if not load_tracker: return OK
+	load_tracker.connected_workers += 1
 	return OK
 
 

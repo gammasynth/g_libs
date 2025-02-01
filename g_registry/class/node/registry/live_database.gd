@@ -35,13 +35,13 @@ var is_loading_file:bool = false
 var load_index = 0
 var group_index = 0
 
-var loading_tracker: LoadTracker
+var load_tracker: LoadTracker
 
 func _hookup_loader() -> Error:
-	if not loading_tracker: return OK
-	begin_load.connect(loading_tracker.worker_started)
-	load_work.connect(loading_tracker.worker_worked)
-	finished_load.connect(loading_tracker.worker_finished)
+	if not load_tracker: return OK
+	begin_load.connect(load_tracker.worker_started)
+	load_work.connect(load_tracker.worker_worked)
+	finished_load.connect(load_tracker.worker_finished)
 	return OK
 
 func clean_functional_tags_from_file_name(file_name:String) -> String:

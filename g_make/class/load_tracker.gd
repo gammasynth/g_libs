@@ -4,6 +4,7 @@ signal finished
 
 var progress_bar: ProgressBar
 var event_text: RichTextLabel
+var description_text: RichTextLabel
 
 var additive_load:bool = true
 
@@ -47,8 +48,9 @@ func setup_loader(final_value:int) -> Error:
 	return OK
 
 
-func push_work_text(work_text:String) -> Error:
+func push_work_text(work_text:String, work_desc:String="") -> Error:
 	event_text.text = work_text
+	description_text.text = work_desc
 	await RenderingServer.frame_post_draw
 	return OK
 
