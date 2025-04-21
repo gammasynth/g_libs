@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cpvkx6diurmom"]
 
-[ext_resource type="Script" path="res://lib/g_libs/g_db/scene/prefab/ui/debug/debug_database_graph.gd" id="1_2vhsd"]
-[ext_resource type="Script" path="res://lib/g_libs/g_db/class/node/canvas_item/control/tree/debug_database_tree.gd" id="2_yc87n"]
+[ext_resource type="Script" uid="uid://bbs43ojvp35kx" path="res://lib/g_libs/g_db/scene/prefab/ui/debug/debug_database_graph.gd" id="1_2vhsd"]
+[ext_resource type="Script" uid="uid://b3sg7trdq4aa5" path="res://lib/g_libs/g_db/class/node/canvas_item/control/tree/debug_database_tree.gd" id="2_yc87n"]
 
 [node name="DebugDatabaseGraph" type="MarginContainer"]
 anchors_preset = 15

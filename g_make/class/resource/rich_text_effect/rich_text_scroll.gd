@@ -1,0 +1,44 @@
+@tool
+extends RichTextEffect
+class_name RichTextScroll
+
+# Syntax: [matrix clean=2.0 dirty=1.0 span=50][/matrix]
+
+# Define the tag name.
+var bbcode = "scroll"
+
+# Gets TextServer for retrieving font information.
+func get_text_server():
+	return TextServerManager.get_primary_interface()
+
+
+func _process_custom_fx(char_fx):
+	#return
+	# Get parameters, or use the provided default value if missing.
+	var x = char_fx.env.get("x", 1.0)
+	var y = char_fx.env.get("y", 0.0)
+	var speed = char_fx.env.get("speed", 10.0)
+	var jumble_x = char_fx.env.get("jumble_x", 0.101251)
+	var jumble_y = char_fx.env.get("jumble_y", 2.001251)
+	var mixup = char_fx.env.get("mixup", 0.1)
+
+	var value = char_fx.glyph_index
+
+	#var matrix_time = fmod(char_fx.elapsed_time + (char_fx.range.x / float(text_span)), \
+						   #clear_time + dirty_time)
+#
+	#matrix_time = 0.0 if matrix_time < clear_time else \
+				  #(matrix_time - clear_time) / dirty_time
+#
+	#if matrix_time > 0.0:
+		#value = int(1 * matrix_time * (126 - 65))
+		#value %= (126 - 65)
+		#value += 65
+	#char_fx.glyph_index = get_text_server().font_get_glyph_index(char_fx.font, 1, value, 0)
+	#char_fx.offset = Vector2(sin(randf_range(0.0, jumble_x)),sin(randf_range(0.0, jumble_y)))# * char_fx.transform.origin# * Vector2(1,1)
+	var mx: float = sin(char_fx.elapsed_time) * speed# * 0.1
+	#print(mx)
+	#char_fx.offset -= Vector2(x,y) * 0.85
+	#char_fx.offset += clampf(sin(mx), 0, mx) * Vector2(x,y)
+	char_fx.offset += mx * Vector2(x,y)
+	return true

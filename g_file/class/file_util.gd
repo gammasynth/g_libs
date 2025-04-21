@@ -75,7 +75,7 @@ static func get_file(file_path:String, passkey:String="", force:bool=false) -> F
 		file = FileAccess.open_encrypted_with_pass(file_path, FileAccess.READ, passkey)
 	else:
 		file = FileAccess.open(file_path, FileAccess.READ)
-	if not force and not file: print("FILE ERROR | " + "file open: " + file_path + ", code: " + error_string(file.get_open_error()))
+	if not force and not file: print("FILE ERROR | " + "file open: " + file_path)
 	if force and not file:
 		file = FileAccess.open(file_path, FileAccess.WRITE_READ)
 	return file
