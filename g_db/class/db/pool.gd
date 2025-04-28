@@ -3,8 +3,8 @@ class_name Pool
 
 # What is a Pool
 
-var pool: Callable = get_fancy_pool
-var pools: Callable = get_fancy_pools
+#var pool: Callable = get_fancy_pool
+#var pools: Callable = get_fancy_pools
 
 func get_fancy_pools(at_keys:Array[Variant], pool_class_name:String="pool", extra_pool_parameters:Array=[], pool_parent_instance:RefInstance=null) -> Array[Pool]:
 	var pools : Array[Pool] = []

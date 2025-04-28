@@ -59,7 +59,7 @@ func _clean_functional_tags_from_file_name(file_name:String) -> String:
 	return file_name
 
 
-func check_folder_for_folder(folder_path:String, target_folder_name:String, action:Callable, recursive:bool = false, condition:Callable=func(n):return true) -> void:
+func check_folder_for_folder(folder_path:String, target_folder_name:String, action:Callable, recursive:bool = false, condition:Callable=func(_n):return true) -> void:
 	var library_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
 	
 	#if library_folders.has(target_folder_name): action.call(str(folder_path + target_folder_name + "/"))

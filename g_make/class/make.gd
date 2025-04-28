@@ -72,13 +72,13 @@ static func disable_control(node:Control, recursive:bool=true) -> void:
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE; node.focus_mode = Control.FOCUS_NONE
 	
 	if recursive:
-		for child in node.get_children():
-			if not child or not is_instance_valid(child): continue
-			if child is Control: disable_control(child)
+		for kid in node.get_children():
+			if not kid or not is_instance_valid(kid): continue
+			if kid is Control: disable_control(kid)
 
 static func clear_children(node:Node, excluding_children:Array[Node]=[]) -> void:
-	for child in node.get_children():
-		if excluding_children.has(child): continue
-		node.remove_child(child)
-		child.queue_free()
+	for kid in node.get_children():
+		if excluding_children.has(kid): continue
+		node.remove_child(kid)
+		kid.queue_free()
 	return

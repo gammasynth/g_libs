@@ -70,7 +70,7 @@ static func try_pull_class_script_from_data(class_string_name:String, from:Varia
 
 static func try_instantiate(class_string_name:String="", params:Array=[]) -> Object:
 	
-	var class_script: GDScript
+	var class_script: GDScript = null
 	
 	if not class_script: class_script = try_pull_class_script_from_data(class_string_name, replacement_class_database)
 	if not class_script: class_script = try_pull_class_script_from_data(class_string_name, replacement_class_dictionary)
