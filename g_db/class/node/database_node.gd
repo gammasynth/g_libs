@@ -136,6 +136,7 @@ func grab(at_key:Variant) -> Variant: return db.grab(at_key)
 
 
 #region Chat / Warn / Check
+func chatf(text:String) -> Variant: return chat(text, -1, true)
 func chat(text:String, clr:Variant=-1, force:bool=false, return_ok:bool=false) -> Variant:return db.chat(text, clr, force, return_ok)
 func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: return db.chatd(text, clr, return_ok)
 

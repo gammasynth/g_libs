@@ -45,6 +45,7 @@ func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
 		name = _name
 	
 	db = _create_database()
+	if db.is_origin_instance: print(str(name + " IS ORIGIN"))
 	db.key = _key
 	
 	db.name_changed.connect(func(n1, _n2): name = n1)
@@ -135,6 +136,7 @@ func grab(at_key:Variant) -> Variant: return db.grab(at_key)
 
 
 #region Chat / Warn / Check
+func chatf(text:String) -> Variant: return chat(text, -1, true)
 func chat(text:String, clr:Variant=-1, force:bool=false, return_ok:bool=false) -> Variant:return db.chat(text, clr, force, return_ok)
 func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: return db.chatd(text, clr, return_ok)
 
