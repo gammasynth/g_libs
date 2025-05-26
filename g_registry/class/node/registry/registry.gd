@@ -4,7 +4,7 @@ extends RegistryStack
 ## All registries can be access globally from Registry.instance
 ## [br]
 ## [br]
-## Registry depends on the [FileManager] class system.
+## Registry depends on the [File] class system.
 ## [br][br]
 ## A Registry can be added as a node to a game, and can then be told to search for file paths for any kind of data loaded from files, such as scripts, textures, audio, and other resources.
 ## [br][br]

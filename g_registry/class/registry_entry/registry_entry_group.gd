@@ -33,7 +33,7 @@ static func is_subfolder_a_new_group(subfolder_path:String, registry_data:Dictio
 			return false
 		if file_name.ends_with("_data.gd") or file_name.ends_with("_data"):
 			return false
-	#var folders = FileManager.get_all_directories_from_directory(subfolder_path)
+	#var folders = File.get_all_directories_from_directory(subfolder_path)
 	#if folders.is_empty(): return false
 	if deep_debug_all: 
 		print_rich(Text.color(str(folder + " is new group"), Text.COLORS.yellow))

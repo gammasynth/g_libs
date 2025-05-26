@@ -9,13 +9,5 @@ func _boot_registry():
 	# override this function to set name and what directories to load files from for this registry
 	directories_to_load = [
 	]
-	check_folder_for_folder(
-		"res://", 
-		"debug", 
-		(func(n): directories_to_load.append(n)), 
-		true, 
-		(func(n): 
-			if not subregistry_paths.has(n): return true
-			return false)
-	)
+	#search_for_loadable_content_by_name("res://", "debug")
 	return OK

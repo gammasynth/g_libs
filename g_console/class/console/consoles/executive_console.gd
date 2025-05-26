@@ -17,7 +17,7 @@ func _get_parser():
 func execute(order:String) -> void:
 	var output = []
 	OS.execute("CMD.exe", ["/C", str("cd " + current_directory_path + " && " + order)], output, true, false)
-	print(output)
+	chat(output, -1, true)
 	print_out(order)
 	print_out(output)
 

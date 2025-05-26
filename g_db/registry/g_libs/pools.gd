@@ -16,8 +16,8 @@ func _boot_registry():
 		"res://g_libs/g_db/class/db/pool.gd"
 	]
 	
-	#var all_class_folder_paths: Array[String] = FileManager.get_all_directories_from_directory("res://", true, true)
-	#var all_class_folder_names: Array[String] = FileManager.get_all_directories_from_directory("res://", false, true)
+	#var all_class_folder_paths: Array[String] = File.get_all_directories_from_directory("res://", true, true)
+	#var all_class_folder_names: Array[String] = File.get_all_directories_from_directory("res://", false, true)
 	#
 	#var all_pool_folder_paths: Array[String] = []
 	#
@@ -32,7 +32,7 @@ func _boot_registry():
 	#
 	#for pool_folder_path in all_pool_folder_paths:
 		#all_pool_script_paths.append_array(
-			#FileManager.get_all_filepaths_from_directory(pool_folder_path, "", true)
+			#File.get_all_filepaths_from_directory(pool_folder_path, "", true)
 		#)
 	#
 	#directories_to_load.append_array(all_pool_script_paths)

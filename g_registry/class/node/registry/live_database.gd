@@ -153,6 +153,8 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 		var new_file = file.new()
 		if new_file is RegistryEntry:
 			file = new_file
+		
+		if new_file is Registry: return null
 	
 	var file_name = File.get_file_name_from_file_path(file_path)
 	

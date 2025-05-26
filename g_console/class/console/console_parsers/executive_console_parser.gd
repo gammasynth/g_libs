@@ -25,7 +25,7 @@ func _fallback_console_parse(text_line:String) -> Error:
 	## this could be a file, or a URL
 	#if extension.length() > 0:
 		## check if file, else check if URL
-		#var file_paths: Array[String] = FileManager.get_all_filepaths_from_directory(console.current_directory_path)
+		#var file_paths: Array[String] = File.get_all_filepaths_from_directory(console.current_directory_path)
 		#for fp: String in file_paths:
 			#print(fp)
 			#if text_line.to_snake_case() == fp.to_snake_case():
@@ -55,7 +55,7 @@ func _fallback_console_parse(text_line:String) -> Error:
 	if not operated: operated = is_text_line_a_subfolder(text_line)
 	
 	if not operated:
-		print(str(console.current_directory_path + text_line))
+		chat(str(console.current_directory_path + text_line), -1, true)
 		console.execute(text_line)
 		operated = true
 	
