@@ -39,6 +39,15 @@ func _make_new_chunk(chunk_pos:Vector2i) -> Chunk2D:
 	chunks.add(chunk, chunk_pos)
 	return chunk
 
+func erase_chunk(chunk:Chunk2D) -> void:
+	var chunk_pos: Vector2i = chunk.position
+	var spr = chunk.canvas_item
+	if spr and is_instance_valid(spr):
+		spr.queue_free()
+	if chunks.has(chunk_pos): chunks.erase(chunk_pos)
+
+
+
 func get_chunk_pool_from_global_position(pool_name: String, position:Vector2, pool_parent:RefInstance=null) -> Pool:
 	var chunk: Chunk2D = get_chunk_from_global_position(position)
 	if not pool_parent: pool_parent = chunk
