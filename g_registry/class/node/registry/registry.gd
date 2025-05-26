@@ -49,8 +49,9 @@ static func search_for_registry(by_name:String, in_data:Dictionary, recursive:bo
 	return null
 
 static func get_registry(by_name:String, recursive:bool=true) -> Registry:
-	for r_key in registries:
-		var r: Registry = registries[r_key]
+	for r_key in Registry.instance.subregistries:
+		
+		var r: Registry = Registry.instance.subregistries[r_key]
 		if r.name == by_name: return r
 		
 		if recursive:

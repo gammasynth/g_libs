@@ -13,8 +13,8 @@ static var registries = {}
 		#return {}
 
 ## global counter indexing of all registries in app
-var registry_idx:int = -1
-static var registry_count:int = -1
+var registry_idx:int = 0
+static var registry_count:int = 0
 
 
 ## If a Registry has Subregistries (other Registries as the elements it contains), we can reference them by their name as a key in subregistries dictionary.
@@ -31,7 +31,7 @@ var booted_subregistries:int = 0
 func _initialized() -> void:
 	registry_count += 1
 	registry_idx = registry_count
-	if registry_idx == 0:
+	if registry_idx == 1:
 		instance = self
 		_setup_main_registry_subregistries()
 	get_mod_folder_paths()
@@ -100,7 +100,7 @@ func _gather_subregistry_paths() -> Error: return OK
 
 
 func _registry_booting() -> Error:
-	if not instance == self: registries[name] = self
+	if registry_count > 1: registries[name] = self
 	return OK
 
 func _boot_finished() -> Error:
@@ -144,6 +144,9 @@ func create_subregistries_from_folder(folder_path:String, exclude_file_paths:Arr
 		all_filepaths.push_front(main_subregistry_path)
 	for filepath in all_filepaths:
 		if exclude_file_paths.has(filepath): continue;
+		
+		if filepath.ends_with(".uid"): continue;
+		
 		var r = await create_subregistry(filepath); 
 		if r: 
 			if new_registries.has(r) or registries.values().has(r):

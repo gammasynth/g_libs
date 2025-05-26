@@ -8,6 +8,7 @@
 
 [node name="ScriptTool" type="Node" parent="."]
 script = ExtResource("1_jrw37")
+control_script_path = "res://lib/g_libs/g_db/class/node/database_node.gd"
 
 [node name="ShaderTool" type="Node" parent="."]
 script = ExtResource("2_o32pp")

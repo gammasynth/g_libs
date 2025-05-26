@@ -132,6 +132,7 @@ func _finish_tick() -> Error: return OK
 func data_size() -> int: return db.data_size()
 func find_data(key:String, search:Database.SEARCH=Database.SEARCH.SINGLE) -> Variant: return db.find_data(key, search)
 func grab(at_key:Variant) -> Variant: return db.grab(at_key)
+func add(value:Variant, at_key:Variant=null, force:bool=false, verbose:bool=false) -> bool: return db.add(value, at_key, force, verbose)
 #endregion
 
 

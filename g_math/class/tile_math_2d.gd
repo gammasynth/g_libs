@@ -11,10 +11,18 @@ static func grid_to_global_pos(grid_point:Vector2i, cell_size:Vector2=Vector2(8,
 	return VectorMath2D.floor_vec2(grid_point.x * cell_size.x, grid_point.y * cell_size.y) + offset
 #endregion
 
-static func create_tiles_between_points(point_a:Vector2i, point_b:Vector2i, manhattan:bool=false) -> Array[Vector2i]:
-	var tiles: Array[Vector2i] = []
+static func plot_tiles_between_points(point_a:Vector2i, point_b:Vector2i, manhattan:bool=false, skip:int=0) -> PackedVector2Array:
+	var tiles: PackedVector2Array = []
 	var point: Vector2i = point_a
+	var skipping:int = 0
 	for d in round(point.distance_to(point_b)) * 2:
+		
+		if skipping < skip:
+			skipping += 1
+			continue
+		else:
+			skipping = 0
+		
 		if manhattan: point = Vector2i(Vector2(point).move_toward(Vector2(point_b), 1.0))
 		else: point = Vector2i(floor(move_toward(point.x, point_b.x, 1.0)), floor(move_toward(point.y, point_b.y, 1.0)))
 		if point.distance_to(point_b) > 0: if not tiles.has(point): tiles.append(point)
