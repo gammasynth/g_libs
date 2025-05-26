@@ -4,13 +4,18 @@ extends MarginContainer
 class_name DatabaseMarginContainer
 
 @export var debug:bool=false:
-	get: return db.debug
-	set(b): db.debug = b
+	get = _get_debug,
+	set = _set_debug
+
+func _get_debug() -> bool: return db.debug
+func _set_debug(b:bool) -> void: db.debug = b
 
 @export var deep_debug:bool=false:
-	get: return db.deep_debug
-	set(b): db.deep_debug = b
+	get = _get_deep_debug,
+	set = _set_deep_debug
 
+func _get_deep_debug() -> bool: return db.deep_debug
+func _set_deep_debug(b:bool) -> void: db.deep_debug = b
 
 var db : Database
 func get_database() -> Database: return db

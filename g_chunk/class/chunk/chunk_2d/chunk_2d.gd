@@ -53,13 +53,16 @@ func draw_chunk_borders():
 	if not spr.is_node_ready(): await spr.ready
 	
 	spr.z_index = 100
+	var pos:Vector2 = position * size
+	var offset:Vector2 = size
+	pos = pos - (offset * 0.5)
 	
-	var rect = Rect2(position * size, (size))
+	var rect = Rect2(pos, (size))
 	#var font = preload("res://core/assets/font/Fraunces_9pt_Soft-Thin.ttf")
-	var font = Registry.pull("fonts", "Fraunces_9pt_Soft-Thin")
+	var font = ThemeDB.fallback_font
 	var f : Callable = func():
 		spr.draw_rect(rect, Color.CYAN, false)
-		var p = (position * size) + Vector2i(1,17)
+		var p = Vector2i(pos) + Vector2i(1,1)
 		spr.draw_string(font, p, str(position), HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color.CYAN)
 		#p += Vector2i(0,8)
 		#var e: String = str("e: " + str())
