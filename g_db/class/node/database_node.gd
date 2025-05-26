@@ -142,7 +142,7 @@ func add(value:Variant, at_key:Variant=null, force:bool=false, verbose:bool=fals
 
 
 #region Chat / Warn / Check
-func chatf(text:String) -> Variant: return chat(text, -1, true)
+func chatf(text:String, clr:Variant=-1) -> Variant: return chat(text, clr, true)
 func chat(text:String, clr:Variant=-1, force:bool=false, return_ok:bool=false) -> Variant:return db.chat(text, clr, force, return_ok)
 func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: return db.chatd(text, clr, return_ok)
 

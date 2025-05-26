@@ -98,7 +98,7 @@ static func save_dict_file(file_dict:Dictionary, file_path:String, passkey:Strin
 		#else:
 			#file_error("Load error: LOAD_ALL_GD_FROM_DIR, Bad Object: Not GDScript Object!")
 			#file_error(str(object))
-			#FileManager.file_loading_error()
+			#File.file_loading_error()
 	#
 	#return all_gdscript_classes
 

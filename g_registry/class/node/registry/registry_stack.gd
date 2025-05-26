@@ -54,10 +54,15 @@ func _setup_main_registry_subregistries() -> void:
 		for folder:String in root_folders:
 			var folder_path:String = str("res://" + folder + "/")
 			if is_folder_library(folder_path):
-				check_library_for_registries(folder_path)
+				var src_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
+				if src_folders.has("registry"): subregistry_paths.append(str(folder_path + "registry/"))
 		
 		if root_folders.has("lib"):
-			check_library_for_registries("res://lib/")
+			for folder:String in File.get_all_directories_from_directory("res://lib/"):
+				var folder_path:String = str("res://lib/" + folder + "/")
+				if is_folder_library(folder_path):
+					var src_folders: Array[String] = File.get_all_directories_from_directory(folder_path)
+					if src_folders.has("registry"): subregistry_paths.append(str(folder_path + "registry/"))
 		
 		
 		if root_folders.has("registry"): subregistry_paths.append("res://registry/")
@@ -94,9 +99,21 @@ func gather_subregistry_paths() -> Error:
 		if name == registry_folder:
 			chat(str("linking folder to registry: " + registry_folder))
 			subregistry_paths.append(File.get_folder(registry_path, true))
+	
 	return await _gather_subregistry_paths()
 
 func _gather_subregistry_paths() -> Error: return OK
+
+func search_for_loadable_content_by_name(path:String="res://", folder:String="debug"):
+	check_folder_for_folder(
+		path, 
+		folder, 
+		(func(n): directories_to_load.append(n)), 
+		true, 
+		(func(n): 
+			if not subregistry_paths.has(n) and not directories_to_load.has(n): return true
+			return false)
+	)
 
 
 func _registry_booting() -> Error:

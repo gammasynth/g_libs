@@ -19,11 +19,15 @@ signal started
 signal starting_tick
 signal finished_tick
 
+
 #region Debug
 signal debug_toggled(b:bool)
 
 static var debug_all: bool = false
 static var deep_debug_all: bool = false
+
+static var allow_chat:bool = true
+static var chat_mirror_callable:Variant = null
 
 @export var debug:bool=false: get = get_debug, set = set_debug
 func get_debug() -> bool: return debug or debug_all;
@@ -104,10 +108,21 @@ func _finish_tick() -> Error: return OK
 func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok:bool=false) -> Variant:
 	if not debug and not force: return
 	
-	text = str(persona + " | " + text)
+	if text.is_empty() or text == " ":
+		pass
+	elif text.begins_with("^&"):
+		text = text.substr(2)
+	else:
+		text = str(persona + " | " + text)
 	
-	if clr is int and clr == -1: print(text)
-	else: print_rich(Text.color(text, clr))
+	if clr is int and clr == -1: pass
+	else: text = Text.color(text, clr)
+	
+	if chat_mirror_callable is Callable:
+		chat_mirror_callable.call(text)
+	
+	if allow_chat:
+		print_rich(text)
 	
 	if return_ok: return OK
 	return null

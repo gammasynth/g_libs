@@ -13,7 +13,7 @@ enum SEARCH {SINGLE, NESTED, DEEP}
 ## [br][br]
 ## If using this Database for a Registry, read below:
 ## May contain [Registry], [RegistryEntry], [RegistryEntryGroup], or other data values, keying a value by it's file name without extension is recommended.
-## [i](See [FileManager.get_file_name_from_file_path] and [FileManager.remove_extension_from_file_path])[/i]
+## [i](See [File.get_file_name_from_file_path] and [File.remove_extension_from_file_path])[/i]
 var data:Dictionary = {}
 
 var data_mutex: Mutex = Mutex.new()

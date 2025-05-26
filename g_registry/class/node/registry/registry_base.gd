@@ -176,7 +176,7 @@ func preestablish_registry_entry(entry_name:String, group:RegistryEntryGroup=nul
 	else:
 		if db.has(entry_name): return OK
 	
-	var g = ""; if group: g = str(group.group_name + "/")
+	var g = ""; if group: g = str(group.name + "/")
 	
 	chatd(str("pre-establishing name for RegistryEntry at: " + g + entry_name), Text.COLORS.yellow, true)
 	
@@ -184,7 +184,7 @@ func preestablish_registry_entry(entry_name:String, group:RegistryEntryGroup=nul
 	uses_registry_entries = true
 	
 	if group:
-		if group.group_name == entry_name:
+		if group.name == entry_name:
 			chat(("error: supposed RegistryEntry with same name as parent group: "), Text.COLORS.red)
 			return ERR_BUG
 		group.add(val, entry_name)
@@ -199,12 +199,12 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 	var filepaths = File.get_all_filepaths_from_directory(directory, "", true)
 	#print(filepaths)
 	
-	#var folder_paths = FileManager.get_all_directories_from_directory(directory, true)
+	#var folder_paths = File.get_all_directories_from_directory(directory, true)
 	##print(folder_paths)
 	#for folder in folder_paths:
 		#if not RegistryEntryGroup.is_subfolder_a_group(folder):
 			## we will assume this folder is an element with files inside under a similar name
-			#filepaths.append_array(FileManager.get_all_filepaths_from_directory(folder, "", true))
+			#filepaths.append_array(File.get_all_filepaths_from_directory(folder, "", true))
 	
 	
 	for file_path in filepaths:
@@ -250,7 +250,7 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 				old_unloaded_data_directory.erase(file_path)
 				preestablish_registry_entry(folder_name, group)
 			
-			#if FileManager.remove_extension_from_file_path(FileManager.get_file_name_from_file_path(file_path)) == folder_name:
+			#if File.remove_extension_from_file_path(File.get_file_name_from_file_path(file_path)) == folder_name:
 			if File.get_file_name_from_file_path(file_path) == folder_name:
 				#print(group)
 				#has_registry_entry = true
@@ -338,7 +338,7 @@ func create_group(group_path, parent_group, dir_idx) -> Error:
 	if parent_group:
 		#parent_group.data[group_name] = group
 		parent_group.add(group, group_name)
-		chat(str("creating subgroup: " + group_name + " , in parent group: " + parent_group.group_name))
+		chat(str("creating subgroup: " + group_name + " , in parent group: " + parent_group.name))
 	else:
 		#data[group_name] = group
 		db.add(group, group_name)
