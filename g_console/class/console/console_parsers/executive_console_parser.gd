@@ -67,6 +67,9 @@ func _fallback_console_parse(text_line:String) -> Error:
 func is_text_line_above_folder(text_line:String) -> bool:
 	var cp:String = console.current_directory_path
 	
+	cp = cp.to_lower()
+	text_line = text_line.to_lower()
+	
 	while true:
 		while cp.right(1) == "/" or cp.right(1) == "\\": cp = File.ends_with_slash(cp, false)
 		
@@ -92,11 +95,14 @@ func is_text_line_above_folder(text_line:String) -> bool:
 func is_text_line_a_subfolder(text_line) -> bool:
 	var folder_paths: Array[String] = File.get_all_directories_from_directory(console.current_directory_path, true)
 	
+	text_line = text_line.to_lower()
+	
 	var folder_name: String = File.no_slashes(text_line).to_snake_case()
 	for fp: String in folder_paths:
-		var fn:String = File.no_slashes(fp).to_snake_case()
+		var fn:String = File.no_slashes(fp).to_snake_case().to_lower()
 		if folder_name == fn:
-			console.open_directory(fp)
+			fn = str(File.no_slashes(fp) + "/")
+			console.open_directory(str(console.current_directory_path + fn))
 			return true
 	
 	return false

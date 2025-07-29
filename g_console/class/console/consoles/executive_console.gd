@@ -17,9 +17,11 @@ func _get_parser():
 func execute(order:String) -> void:
 	var output = []
 	OS.execute("CMD.exe", ["/C", str("cd " + current_directory_path + " && " + order)], output, true, false)
-	chat(output, -1, true)
+	chat(str(output), -1, true)
 	print_out(order)
 	print_out(output)
 
 
-func open_directory(at_path:String=current_directory_path) -> void: current_directory_path = at_path
+func open_directory(at_path:String=current_directory_path) -> void: _open_directory(at_path)
+
+func _open_directory(at_path:String=current_directory_path) -> void: current_directory_path = at_path

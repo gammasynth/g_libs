@@ -44,6 +44,8 @@ func _initialized() -> void:
 func check_library_for_registries(folder_path:String, recursive:bool = false, registry_folder_name:String="registry") -> void:
 	check_library_for_folder(folder_path, registry_folder_name, (func(n): subregistry_paths.append(n)), recursive)
 
+func check_folder_for_registries(folder_path:String, recursive:bool = false, registry_folder_name:String="registry") -> void:
+	check_folder_for_folder(folder_path, registry_folder_name, (func(n): subregistry_paths.append(n)), recursive)
 
 
 ## The user/dev may insert subregistry paths before given the default settings with the export variable, or they can override these functions in an extended script.
