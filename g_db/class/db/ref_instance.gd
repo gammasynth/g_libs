@@ -113,7 +113,7 @@ func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok
 	elif text.begins_with("^&"):
 		text = text.substr(2)
 	else:
-		text = str(persona + " | " + text)
+		if not persona.is_empty(): text = str(persona + " | " + text)
 	
 	if clr is int and clr == -1: pass
 	else: text = Text.color(text, clr)

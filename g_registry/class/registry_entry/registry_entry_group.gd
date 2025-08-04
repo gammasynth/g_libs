@@ -5,7 +5,7 @@ class_name RegistryEntryGroup
 
 var uses_groups:bool = false
 
-func _init(_group_name:String, _uses_groups:bool=false) -> void:
+func _init(_group_name:String="group", _uses_groups:bool=false) -> void:
 	super(_group_name)
 	uses_groups = _uses_groups
 	

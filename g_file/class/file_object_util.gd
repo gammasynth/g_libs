@@ -10,38 +10,110 @@ static func string_to_vector2(string := "") -> Vector2:
 		return Vector2(int(array[0]), int(array[1]))
 	return Vector2.ZERO
 
-static func recursively_serialize_object(instance: Object) -> Dictionary:
-	var dict := inst_to_dict(instance)
-	for key in dict:
-		var field = dict[key]
-		if field is Object:
-			dict[key] = recursively_serialize_object(field)
-		elif field is Array:
-			var new_array := []
-			for entry in field:
-				new_array.append(recursively_serialize_object(entry))
-			dict[key] = new_array
-			pass
-		# else keep value
-	return dict
 
-static func initialize_resource_from_dictionary(resource_obj:Resource, resource_dict:Dictionary) -> Resource:
-	var initialized_resource: Resource = resource_obj
-	for property_name in resource_dict.keys():
-		var property_value = resource_dict[property_name]
-		initialized_resource.set(property_name, property_value)
-	return initialized_resource
 
-static func convert_resource_to_dictionary(resource_obj:Resource) -> Dictionary:
-	var resource_dictionary : Dictionary = {}
-	var resource_script: GDScript = resource_obj.get_script()
+
+static func deserialize_object(dict:Dictionary) -> Object:
+	
+	var obj: Object = null
+	
+	var script: GDScript = null
+	if dict.has("SERIALIZED_OBJECT_SCRIPT_PATH"):
+		var script_path = dict["SERIALIZED_OBJECT_SCRIPT_PATH"]
+		script = load(script_path)
+		obj = script.new()
+	
+	if not script:
+		if dict.has("SERIALIZED_OBJECT_CLASS_NAME"):
+			var obj_class_name:String = dict["SERIALIZED_OBJECT_SCRIPT_PATH"]
+			if ClassDB.can_instantiate(obj_class_name):
+				obj = ClassDB.instantiate(obj_class_name)
+			else:
+				printerr(str("No ClassName: " + obj_class_name + " in ClassDB!"))
+	
+	if not obj:
+		printerr("No valid script path or ClassName for dictionary to object initialization! Attempting with base object...")
+		obj = Object.new()
+	
+	for property_name in dict.keys():
+		var property_value = dict[property_name]
+		obj.set(property_name, deserialize_value(property_value))
+	return obj
+
+
+
+static func deserialize_value(value:Variant) -> Variant:
+	if value is Dictionary:
+		if value.has("IS_SERIALIZED_OBJECT"):
+			return deserialize_object(value)
+		
+		var dict := {}
+		for key in value.keys():
+			key = deserialize_value(key)
+			var entry = value[key]
+			entry = deserialize_value(entry)
+			dict[key] = entry
+		value = dict
+	elif value is Array:
+		var arr := []
+		for entry in value:
+			entry = deserialize_value(entry)
+			arr.append(entry)
+		value = arr
+	
+	return value
+
+static func is_value_serializable(value:Variant) -> bool:
+	if value is Object or value is Array or value is Dictionary:
+		return true
+	return false
+
+static func serialize_value(value:Variant) -> Variant:
+	if value is Object:
+		value = serialize_object(value)
+	elif value is Array:
+		var arr := []
+		for entry in value:
+			if is_value_serializable(entry):
+				entry = serialize_value(entry)
+			arr.append(entry)
+	elif value is Dictionary:
+		var dict: Dictionary = {}
+		for key in value.keys():
+			var entry = value[key]
+			if is_value_serializable(key):
+				key = serialize_value(key)
+			if is_value_serializable(entry):
+				entry = serialize_value(entry)
+			dict[key] = entry
+		value = dict
+	return value
+
+static func serialize_object(obj:Object) -> Dictionary:
+	var dict : Dictionary = {}
+	var script: GDScript = obj.get_script()
+	
+	dict["IS_SERIALIZED_OBJECT"] = true
+	
+	if script:
+		var script_path: String = script.get_path()
+		if not script_path.is_empty(): 
+			dict["SERIALIZED_OBJECT_SCRIPT_PATH"] = script_path
+	
+	var obj_class_name: String = obj.get_class()
+	if not obj_class_name.is_empty(): 
+		dict["SERIALIZED_OBJECT_CLASS_NAME"] = obj_class_name
+	
 	#print('Properties of "%s":' % [ resource_script.resource_path ])
-	for property_info in resource_script.get_script_property_list():
-		var property_name: String = property_info.name
-		var property_value = resource_obj.get(property_name)
-		resource_dictionary[property_name] = property_value
+	for property_info in script.get_script_property_list():
+		var property: String = property_info.name
+		var value = obj.get(property)
+		
+		value = serialize_value(value)
+		
+		dict[property] = value
 		#print(' %s = %s' % [ property_name, property_value ])
-	return resource_dictionary
+	return dict
 #endregion
 
 

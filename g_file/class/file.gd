@@ -1,18 +1,5 @@
-## File is a Static Helper Class to streamline interactions with files, folders, and paths.
-## 
-## Most of its functionality is in its related Classes:
-## [br]
-## [FileUtil], [FolderUtil], [FileObjectUtil]
-## [br][br]
-## Any method in one of the above classes is accessible from this File class.
-##[br][br]
-##
-## [FileUtil] methods help manage FilePath and FileName Strings. [br][br]
-## [FileUtil] methods help open, save, and load Files. [br][br]
-##
-## [FolderUtil] methods help manage Directories, and get FilePath Strings within Directories. [br][br]
-##
-## [FileObjectUtil] methods help with serializing data to and from Files.
+## File is a Static Object Class to streamline interactions with files, folders, and paths.
+## See [FileObjectUtil], and [FileUtil], and [FolderUtil].
 class_name File
 
 static var debug:bool = false
@@ -148,11 +135,11 @@ static func get_total_size_of_files_from_file_paths(file_paths:Array[String]) ->
 
 static func string_to_vector2(string := "") -> Vector2: return FileObjectUtil.string_to_vector2(string)
 
-static func recursively_serialize_object(instance: Object) -> Dictionary: return FileObjectUtil.recursively_serialize_object(instance)
+static func serialize_object(instance: Object) -> Dictionary: return FileObjectUtil.serialize_object(instance)
 
-static func initialize_resource_from_dictionary(resource_obj:Resource, resource_dict:Dictionary) -> Resource: return FileObjectUtil.initialize_resource_from_dictionary(resource_obj, resource_dict)
+static func deserialize_object(dictionary:Dictionary) -> Resource: return FileObjectUtil.deserialize_object(dictionary)
 
-static func convert_resource_to_dictionary(resource_obj:Resource) -> Dictionary: return FileObjectUtil.convert_resource_to_dictionary(resource_obj)
+#static func convert_resource_to_dictionary(resource_obj:Resource) -> Dictionary: return FileObjectUtil.convert_resource_to_dictionary(resource_obj)
 #endregion
 
 

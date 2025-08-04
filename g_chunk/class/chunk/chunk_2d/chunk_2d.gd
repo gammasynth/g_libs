@@ -30,7 +30,7 @@ func position_to_name() -> String: return str("Chunk" + str(position))
 
 func _get_database_name(_dn) -> String: return position_to_name()
 
-func _init(_position:Vector2i, _chunk_map:ChunkMap2D) -> void:
+func _init(_position:Vector2i=Vector2i.ZERO, _chunk_map:ChunkMap2D=null) -> void:
 	position = _position
 	super(position_to_name(), position, _chunk_map)
 	
