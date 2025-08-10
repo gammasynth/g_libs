@@ -19,7 +19,7 @@ func asset_registered(file_name:String) -> Error:
 	return OK
 
 func register_asset(file_name:String, asset:Variant) -> Error:
-	if debug: print("RegistryEntry: " + name + " | " + " registering asset: " + file_name)
+	chat("RegistryEntry: " + name + " | " + " registering asset: " + file_name)
 	if await _register_asset(file_name, asset) == OK: return asset_registered(file_name);
 	if not data.has(file_name): data[file_name] = asset; return asset_registered(file_name)
 	return ERR_ALREADY_EXISTS

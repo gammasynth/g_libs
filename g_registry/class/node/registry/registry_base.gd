@@ -255,6 +255,7 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 				#print(group)
 				#has_registry_entry = true
 				preestablish_registry_entry(folder_name, group)
+				
 			
 		
 		if not group and not has_registry_entry:

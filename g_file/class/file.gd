@@ -137,7 +137,7 @@ static func string_to_vector2(string := "") -> Vector2: return FileObjectUtil.st
 
 static func serialize_object(instance: Object) -> Dictionary: return FileObjectUtil.serialize_object(instance)
 
-static func deserialize_object(dictionary:Dictionary) -> Resource: return FileObjectUtil.deserialize_object(dictionary)
+static func deserialize_object(dictionary:Dictionary) -> Object: return FileObjectUtil.deserialize_object(dictionary)
 
 #static func convert_resource_to_dictionary(resource_obj:Resource) -> Dictionary: return FileObjectUtil.convert_resource_to_dictionary(resource_obj)
 #endregion
