@@ -356,37 +356,10 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 	if script:
 		var script_dict:Dictionary = {}
 		dict.set("SCRIPT_PROPERTIES_DICT", script_dict)
-		for property_info in script.get_script_property_list():
-			var property: String = property_info.name
-			var value = obj.get(property)
-			
-			if value is Transform2D or value is Transform3D: continue
-			
-			if value is Node:
-				var existing:Variant = search_for_object_by_id(hash(value))
-				if existing != null: value = {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")}
-				else: 
-					var value_dict: Dictionary = {}
-					script_dict.set(property, value_dict)
-					value_dict = serialize_object(value, value_dict)
-					script_dict.set(property, value_dict)
-			elif value is Object:
-				#dict.set("OBJECT_IDENTIFIER", hash(obj))
-				var this_obj_id = hash(value)
-				var existing:Variant = search_for_object_by_id(this_obj_id)
-				if existing != null: value = {"ONLY_OBJECT_IDENTIFIER" : this_obj_id}
-				else: 
-					var value_dict: Dictionary = {}
-					script_dict.set(property, value_dict)
-					value_dict = serialize_object(value, value_dict)
-					script_dict.set(property, value_dict)
-			else: 
-				if type_string(typeof(value)) == "Nil": continue
-				value = serialize_value(value)
-				script_dict.set(property, value)
-			
-			
-			#print(' %s = %s' % [ property_name, property_value ])
+		
+		serialize_script_properties(script, obj, script_dict)
+		
+		#print(' %s = %s' % [ property_name, property_value ])
 		
 	
 	var prop_dict:Dictionary = {}
@@ -394,6 +367,7 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 	for property_info in obj.get_property_list():
 		
 		var property: String = property_info.name
+		if property == "script": continue
 		if dict.has("SCRIPT_PROPERTIES_DICT"):
 			if dict.get("SCRIPT_PROPERTIES_DICT").has(property): continue
 		
@@ -413,11 +387,14 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 			var this_obj_id = hash(value)
 			var existing:Variant = search_for_object_by_id(this_obj_id)
 			if existing != null: value = {"ONLY_OBJECT_IDENTIFIER" : this_obj_id}
-			#else: 
+			else: 
 				#var value_dict: Dictionary = {}
 				#prop_dict.set(property, value_dict)
 				#value_dict = serialize_object(value, value_dict)
 				#prop_dict.set(property, value_dict)
+				if type_string(typeof(value)) == "Nil": continue
+				value = serialize_value(value)
+				prop_dict.set(property, value)
 		else: 
 			if type_string(typeof(value)) == "Nil": continue
 			value = serialize_value(value)
@@ -428,6 +405,47 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 		current_dictionary = {}
 	return dict
 #endregion
+
+static func serialize_script_properties(script:Script, obj:Object, script_dict:Dictionary) -> Dictionary:
+	for property_info in script.get_script_property_list():
+		var property: String = property_info.name
+		var value = obj.get(property)
+		
+		if value is Transform2D or value is Transform3D: continue
+		
+		if value is Node:
+			var existing:Variant = search_for_object_by_id(hash(value))
+			if existing != null: value = {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")}
+			else: 
+				var value_dict: Dictionary = {}
+				script_dict.set(property, value_dict)
+				value_dict = serialize_object(value, value_dict)
+				script_dict.set(property, value_dict)
+		elif value is Object:
+			#dict.set("OBJECT_IDENTIFIER", hash(obj))
+			var this_obj_id = hash(value)
+			var existing:Variant = search_for_object_by_id(this_obj_id)
+			if existing != null: value = {"ONLY_OBJECT_IDENTIFIER" : this_obj_id}
+			else: 
+				var value_dict: Dictionary = {}
+				script_dict.set(property, value_dict)
+				value_dict = serialize_object(value, value_dict)
+				script_dict.set(property, value_dict)
+				#if type_string(typeof(value)) == "Nil": continue
+				#value = serialize_value(value)
+				#script_dict.set(property, value)
+		else: 
+			if type_string(typeof(value)) == "Nil": continue
+			value = serialize_value(value)
+			script_dict.set(property, value)
+	
+	var base_script:Script = script.get_base_script()
+	if base_script:
+		var base_script_dict:Dictionary = {}
+		base_script_dict = serialize_script_properties(base_script, obj, base_script_dict)
+		script_dict.merge(base_script_dict)
+	
+	return script_dict
 
 static func search_for_deserialized_node(nodepath:NodePath, dict:Dictionary=current_dictionary) -> Variant:
 	if dict.has("FULL_NODEPATH_REF"):
