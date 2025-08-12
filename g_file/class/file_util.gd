@@ -120,7 +120,12 @@ static func is_valid_godot_resource(file_path:String) -> bool:
 static func is_valid_image_resource(file_path:String) -> bool:
 	# this will only validate .png resources, no other file type
 	if file_path.ends_with(".png"): return true
+	if file_path.ends_with(".svg"): return true
+	if file_path.ends_with(".bmp"): return true
+	if file_path.ends_with(".jpeg"): return true
 	return false
+
+
 
 static func is_valid_audio_resource(file_path:String) -> bool:
 	# this will only validate .mp3 resources, no other file type

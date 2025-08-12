@@ -1,6 +1,7 @@
 class_name FileObjectUtil
 
 static var current_dictionary: Dictionary = {}
+static var serialized_objects: Dictionary = {}
 
 #region File Object Serialization
 static func string_to_vector2(string := "") -> Vector2:
@@ -41,11 +42,14 @@ static func deserialize_object(dict:Dictionary) -> Object:
 		printerr("No valid script path or ClassName for dictionary to object initialization! Attempting with base object...")
 		obj = Object.new()
 	
+	
+	
 	dict.set("DESERIALIZED_OBJ", obj)
 	
 	if obj is Node and dict.get("IS_SERIALIZED_NODE"):
 		obj.request_ready()
 		obj.name = dict.get("NODE_ACTUAL_NAME")
+		if obj is Control and obj.name == "_connection_layer": return null
 		dict.set("DESERIALIZED_NODE", obj)
 		if dict.has("SERIALIZED_CHILDREN"):
 			var children: Dictionary = dict.get("SERIALIZED_CHILDREN")
@@ -56,7 +60,7 @@ static func deserialize_object(dict:Dictionary) -> Object:
 				if not child_value is Dictionary: continue
 				
 				if child_value.has("IS_NODE_REF"):
-					child_value = search_for_deserialized_node(child_value.get("FULL_NODEPATH_REF"), current_dictionary)
+					child_value = search_for_deserialized_node(child_value.get("NODE_REF"), current_dictionary)
 				else:
 					if not child_value.has("IS_SERIALIZED_OBJECT"): continue
 					child_value = deserialize_object(child_value)
@@ -209,6 +213,27 @@ static func deserialize_value(value:Variant) -> Variant:
 			var tex: ImageTexture = ImageTexture.create_from_image(deserialize_value(value.get("IMAGE")))
 			return tex
 		
+		if value.has("IS_CALLABLE_VALUE"):
+			var obj:Object = null
+			if value.has("ONLY_OBJECT_IDENTIFIER"):
+				var object_id = value.get("ONLY_OBJECT_IDENTIFIER")
+				var obj_dict = search_for_object_by_id(object_id)
+				if obj_dict is Dictionary and obj_dict.has("DESERIALIZED_OBJ"):
+					obj = obj_dict.get("DESERIALIZED_OBJ")
+			else: 
+				if value.has("OBJECT_ROOT"): 
+					obj = deserialize_object(value.get("OBJECT_ROOT"))
+			
+			if not obj:
+				push_error("UNABLE TO DESERIALIZE CALLABLE OBJECT!")
+				return null
+			
+			var method:StringName = value.get("METHOD_NAME")
+			var has_method:bool = obj.has_method(method)
+			var try_method = obj.get(method)
+			var callable = Callable(obj, method)
+			print(callable)
+			return callable
 		
 		var dict := {}
 		for key in value.keys():
@@ -233,6 +258,9 @@ static func deserialize_value(value:Variant) -> Variant:
 	#return false
 
 static func serialize_value(value:Variant) -> Variant:
+	
+	if value is bool or value is int or value is float or value is String: return value
+	
 	if value is Dictionary:
 		var dict: Dictionary = {}
 		for key in value.keys():
@@ -301,8 +329,39 @@ static func serialize_value(value:Variant) -> Variant:
 		value = dict
 	elif value is Object:
 		value = serialize_object(value)
+	elif value is Callable:
+		# try to serialize callable
+		if not value.is_valid():
+			push_error("TRIED TO SERIALIZE NON-VALID CALLABLE!")
+			push_error(str(value))
+			return null
+		
+		var callable_dict:Dictionary = {}
+		callable_dict.set("IS_CALLABLE_VALUE", true)
+		#var args = []
+		#for arg in value.get_bound_arguments():
+			#args.append(arg)
+		
+		var object:Object = value.get_object()
+		
+		if not object: 
+			push_error("TRIED TO SERIALIZE NON-OBJECT CALLABLE!")
+			return null
+		
+		var object_id:int = object.get_instance_id()
+		var existing:Variant = search_for_object_by_id(object_id)
+		if existing != null: callable_dict.set("ONLY_OBJECT_IDENTIFIER", object_id)
+		else: 
+			var value_dict: Dictionary = {}
+			callable_dict.set("OBJECT_ROOT", value_dict)
+			value_dict = serialize_object(object, value_dict)
+			callable_dict.set("OBJECT_ROOT", value_dict)
+		callable_dict.set("METHOD_NAME", value.get_method())
+		
+		value = callable_dict
+		#return value
 	else:
-		if value is not bool and value is not int and value is not float and value is not String :
+		if value != null and value is not bool and value is not int and value is not float and value is not String:
 			#print(str("UNSERIALIZED TYPE: " + type_string(typeof(value)) + " | " + str(value)))
 			value = var_to_str({"STRING_DATA" : value})
 	return value
@@ -317,7 +376,11 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 	
 	var local_current_dictionary = current_dictionary
 	
-	dict.set("OBJECT_IDENTIFIER", hash(obj))
+	var obj_id:int = obj.get_instance_id()
+	if serialized_objects.has(obj_id):return  serialized_objects.get(obj_id)
+	
+	dict.set("OBJECT_IDENTIFIER", obj_id)
+	if not serialized_objects.has(obj_id): serialized_objects.set(obj_id, dict)
 	
 	dict.set("IS_SERIALIZED_OBJECT", true)
 	
@@ -339,7 +402,7 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 		dict.set("SERIALIZED_CHILDREN", children)
 		var kids = obj.get_children()
 		for child in kids:
-			var existing:Variant = search_for_object_by_id(hash(child))
+			var existing:Variant = search_for_object_by_id(child.get_instance_id())
 			if existing != null: 
 				children.set(child.name, {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")})
 			else: 
@@ -356,9 +419,8 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 	if script:
 		var script_dict:Dictionary = {}
 		dict.set("SCRIPT_PROPERTIES_DICT", script_dict)
-		
 		serialize_script_properties(script, obj, script_dict)
-		
+		dict.set("SCRIPT_PROPERTIES_DICT", script_dict)
 		#print(' %s = %s' % [ property_name, property_value ])
 		
 	
@@ -368,6 +430,7 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 		
 		var property: String = property_info.name
 		if property == "script": continue
+		if property == "multiplayer": continue
 		if dict.has("SCRIPT_PROPERTIES_DICT"):
 			if dict.get("SCRIPT_PROPERTIES_DICT").has(property): continue
 		
@@ -375,34 +438,37 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 		if value is Transform2D or value is Transform3D: continue
 		
 		if value is Node:
-			var existing:Variant = search_for_object_by_id(hash(value))
-			if existing != null: value = {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")}
-			#else: 
-				#var value_dict: Dictionary = {}
-				#prop_dict.set(property, value_dict)
-				#value_dict = serialize_object(value, value_dict)
-				#prop_dict.set(property, value_dict)
+			var existing:Variant = search_for_object_by_id(value.get_instance_id())
+			if existing != null: 
+				value = {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")}
+				prop_dict.set(property, value)
+			else: 
+				var value_dict: Dictionary = {}
+				prop_dict.set(property, value_dict)
+				value_dict = serialize_object(value, value_dict)
+				prop_dict.set(property, value_dict)
 		elif value is Object:
 			#dict.set("OBJECT_IDENTIFIER", hash(obj))
-			var this_obj_id = hash(value)
+			var this_obj_id = value.get_instance_id()
 			var existing:Variant = search_for_object_by_id(this_obj_id)
 			if existing != null: value = {"ONLY_OBJECT_IDENTIFIER" : this_obj_id}
 			else: 
-				#var value_dict: Dictionary = {}
-				#prop_dict.set(property, value_dict)
-				#value_dict = serialize_object(value, value_dict)
-				#prop_dict.set(property, value_dict)
-				if type_string(typeof(value)) == "Nil": continue
-				value = serialize_value(value)
-				prop_dict.set(property, value)
+				var value_dict: Dictionary = {}
+				prop_dict.set(property, value_dict)
+				value_dict = serialize_object(value, value_dict)
+				prop_dict.set(property, value_dict)
+				#if type_string(typeof(value)) == "Nil": continue
+				#value = serialize_value(value)
+				#prop_dict.set(property, value)
 		else: 
 			if type_string(typeof(value)) == "Nil": continue
 			value = serialize_value(value)
 			prop_dict.set(property, value)
 	
 	
-	if current_dictionary.get("OBJECT_IDENTIFIER") == hash(obj):
+	if current_dictionary.get("OBJECT_IDENTIFIER") == obj.get_instance_id():
 		current_dictionary = {}
+		serialized_objects.clear()
 	return dict
 #endregion
 
@@ -410,11 +476,11 @@ static func serialize_script_properties(script:Script, obj:Object, script_dict:D
 	for property_info in script.get_script_property_list():
 		var property: String = property_info.name
 		var value = obj.get(property)
-		
+		if property == "multiplayer": continue
 		if value is Transform2D or value is Transform3D: continue
 		
 		if value is Node:
-			var existing:Variant = search_for_object_by_id(hash(value))
+			var existing:Variant = search_for_object_by_id(value.get_instance_id())
 			if existing != null: value = {"IS_NODE_REF" : true, "NODE_REF" : existing.get("FULL_NODEPATH_REF")}
 			else: 
 				var value_dict: Dictionary = {}
@@ -423,7 +489,7 @@ static func serialize_script_properties(script:Script, obj:Object, script_dict:D
 				script_dict.set(property, value_dict)
 		elif value is Object:
 			#dict.set("OBJECT_IDENTIFIER", hash(obj))
-			var this_obj_id = hash(value)
+			var this_obj_id = value.get_instance_id()
 			var existing:Variant = search_for_object_by_id(this_obj_id)
 			if existing != null: value = {"ONLY_OBJECT_IDENTIFIER" : this_obj_id}
 			else: 
@@ -449,7 +515,7 @@ static func serialize_script_properties(script:Script, obj:Object, script_dict:D
 
 static func search_for_deserialized_node(nodepath:NodePath, dict:Dictionary=current_dictionary) -> Variant:
 	if dict.has("FULL_NODEPATH_REF"):
-		if dict.get("FULL_NODEPATH_REF") == nodepath:
+		if NodePath(dict.get("FULL_NODEPATH_REF")) == NodePath(nodepath):
 			if dict.has("DESERIALIZED_NODE"):
 				return dict.get("DESERIALIZED_NODE")
 			else:
@@ -473,8 +539,10 @@ static func search_for_deserialized_node(nodepath:NodePath, dict:Dictionary=curr
 				#if key == node_name and entry is Dictionary and entry.has("IS_SERIALIZED_NODE"): return entry
 	#return null
 
-static func search_for_object_by_id(obj_id:int, dict:Dictionary=current_dictionary, searched_dictionaries:Array=[]) -> Variant:
-	searched_dictionaries.append(dict.hash())
+static func search_for_object_by_id(obj_id:int, dict:Dictionary=current_dictionary) -> Variant:#, searched_dictionaries:Array=[]) -> Variant:
+	var current_serialized_objects = serialized_objects
+	if current_serialized_objects.has(obj_id): return current_serialized_objects.get(obj_id)
+	#searched_dictionaries.append(dict.hash())
 	if dict.has("OBJECT_IDENTIFIER"):
 		if dict.get("OBJECT_IDENTIFIER") == obj_id:
 			return dict
@@ -484,9 +552,10 @@ static func search_for_object_by_id(obj_id:int, dict:Dictionary=current_dictiona
 	for key in dict:
 		var val = dict.get(key)
 		if val is Dictionary:
-			if searched_dictionaries.has(val.hash()): continue
-			var found:Variant = search_for_object_by_id(obj_id, val, searched_dictionaries)
+			#if searched_dictionaries.has(val.hash()): continue
+			var found:Variant = search_for_object_by_id(obj_id, val)#, searched_dictionaries)
 			if found != null: return found
+	
 	return null
 
 #region File Object Saving and Loading
