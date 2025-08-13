@@ -11,9 +11,9 @@ static func grid_to_global_pos(grid_point:Vector2i, cell_size:Vector2=Vector2(8,
 	return VectorMath2D.floor_vec2(grid_point.x * cell_size.x, grid_point.y * cell_size.y) + offset
 #endregion
 
-static func plot_tiles_between_points(point_a:Vector2i, point_b:Vector2i, manhattan:bool=false, skip:int=0) -> PackedVector2Array:
+static func plot_tiles_between_points(point_a:Vector2, point_b:Vector2, manhattan:bool=false, skip:int=0) -> PackedVector2Array:
 	var tiles: PackedVector2Array = []
-	var point: Vector2i = point_a
+	var point: Vector2 = point_a
 	var skipping:int = 0
 	for d in round(point.distance_to(point_b)) * 2:
 		
@@ -23,8 +23,8 @@ static func plot_tiles_between_points(point_a:Vector2i, point_b:Vector2i, manhat
 		else:
 			skipping = 0
 		
-		if manhattan: point = Vector2i(Vector2(point).move_toward(Vector2(point_b), 1.0))
-		else: point = Vector2i(floor(move_toward(point.x, point_b.x, 1.0)), floor(move_toward(point.y, point_b.y, 1.0)))
+		if manhattan: point = point.move_toward(point_b, 1.0)
+		else: point = Vector2(move_toward(point.x, point_b.x, 1.0), move_toward(point.y, point_b.y, 1.0))
 		if point.distance_to(point_b) > 0: if not tiles.has(point): tiles.append(point)
 		else: break
 	return tiles
@@ -79,7 +79,7 @@ static func create_pixels_in_tile(tile_size:int, tile_origin:Vector2=Vector2.ZER
 
 
 ## Return an Array[Vector2i] of tile positions in a sized square, centered at center_point.
-static func create_tiles_in_square(square_size_x:int, square_size_y:int, center_point:Vector2=Vector2.ZERO) -> Array[Vector2i]:
+static func create_tiles_in_square(square_size_x:int, square_size_y:int, center_point:Vector2=Vector2.ZERO, only_outline:bool=false) -> Array[Vector2i]:
 	var tiles : Array[Vector2i] = []
 	var pos_x:float = center_point.x + (-square_size_x)
 	var pos_y:float = center_point.y + (-square_size_y)
@@ -90,6 +90,12 @@ static func create_tiles_in_square(square_size_x:int, square_size_y:int, center_
 			pos_y += 1
 		pos_y = center_point.y + (-square_size_y)
 		pos_x += 1
+	if only_outline:
+		var outline_tiles: Array[Vector2i] = []
+		for tile in tiles:
+			if tile.x == center_point.x + square_size_x or tile.x == center_point.x - square_size_x or tile.y == center_point.y + square_size_y or tile.y == center_point.y - square_size_y:
+				outline_tiles.append(tile)
+		return outline_tiles
 	return tiles
 
 ## Perform a Callable on tile positions in a sized square, centered at center_point.

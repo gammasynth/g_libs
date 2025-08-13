@@ -100,6 +100,7 @@ static func deserialize_object(dict:Dictionary) -> Object:
 		
 		var dont_control:bool = false
 		if obj is Control:
+			var obj_parent = obj.get_parent_control()
 			dont_control = true
 		
 		for property_name in prop_dict.keys():
