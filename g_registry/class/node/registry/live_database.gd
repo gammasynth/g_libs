@@ -133,7 +133,7 @@ func try_load_next_file(file_path:String) -> Variant:
 	#print("E: " + file_path)
 	if File.is_valid_resource(file_path):
 		chat("ResourceLoader load interactive: " + file_path)
-		var err = ResourceLoader.load_threaded_request(file_path)
+		var err = ResourceLoader.load_threaded_request(file_path, "", true, ResourceLoader.CACHE_MODE_REPLACE_DEEP)
 		if err == OK:
 			is_loading_file = true; return null
 	
@@ -194,6 +194,7 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 		var entry_object:RegistryEntry
 		if uses_groups:
 			var group = await RegistryEntryGroup.get_group_from_element_filepath(data, file_path, group_folder_paths, directories_to_load)
+			if not group: group = await RegistryEntryGroup.find_group(folder_name, data)
 			if not group.data.has(entry_name):
 				if skip_loose_files:
 					chat("There is no loaded RegistryEntry for the following asset, skipping: " + file_path)

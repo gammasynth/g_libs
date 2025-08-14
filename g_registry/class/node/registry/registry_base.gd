@@ -348,8 +348,9 @@ func create_group(group_path, parent_group, dir_idx) -> Error:
 	if not group_folder_paths.has(group_name): group_folder_paths[group_name] = group_path
 	
 	var folder_paths = File.get_all_directories_from_directory(group_path, true)
-	if folder_paths.is_empty():
-		await collect_unloaded_directory_data(group_path, dir_idx)
+	#if folder_paths.is_empty():
+		#await collect_unloaded_directory_data(group_path, dir_idx)
+	await collect_unloaded_directory_data(group_path, dir_idx)
 	
 	for subfolder in folder_paths:
 		#print(subfolder)
