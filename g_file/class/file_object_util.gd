@@ -740,14 +740,14 @@ static func load_audio(file_path:String) -> AudioStreamMP3:
 
 static func try_load_file(file_path:String, only_user_files:bool=false) -> Variant:
 	if only_user_files and not FileUtil.is_user_dir(file_path): return null
-	var _is_godot_resource:bool = false
+	var is_godot_resource:bool = false
 	var is_image_resource:bool = false
 	var is_audio_resource:bool = false
 	var is_script_resource:bool = false
 	
 	var is_valid:bool = true
 	
-	if FileUtil.is_valid_godot_resource(file_path): _is_godot_resource = true
+	if FileUtil.is_valid_godot_resource(file_path): is_godot_resource = true
 	elif FileUtil.is_valid_image_resource(file_path): is_image_resource = true;
 	elif FileUtil.is_valid_audio_resource(file_path): is_audio_resource = true;
 	elif FileUtil.is_valid_gd_script_file(file_path): is_script_resource = true;

@@ -96,11 +96,14 @@ static func is_import_info_file(file_path) -> bool:
 
 static func is_valid_gd_script_file(file_path:String) -> bool:
 	if file_path.ends_with(".gd"): return true
+	if file_path.ends_with(".gdc"): return true
 	return false
 
 static func is_valid_godot_resource(file_path:String) -> bool:
 	# this will only validate .tscn, .scn, .tres, and .res files, no other filetypes
 	if file_path.ends_with(".tscn"): return true
+	if file_path.ends_with(".tscn.remap"): return true
+	
 	if file_path.ends_with(".scn"): return true
 	if file_path.ends_with(".tres"): return true
 	if file_path.ends_with(".res"):return true
@@ -143,6 +146,7 @@ static func is_valid_resource(file_path:String) -> bool:
 		if is_valid_image_resource(file_path): return true
 		if is_valid_audio_resource(file_path): return true
 		if is_valid_godot_resource(file_path): return true
+		if is_valid_gd_script_file(file_path): return true
 	return false
 #endregion
 

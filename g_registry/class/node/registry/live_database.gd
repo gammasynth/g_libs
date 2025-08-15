@@ -132,6 +132,12 @@ func update_unloaded_data_directory() -> bool:
 func try_load_next_file(file_path:String) -> Variant:
 	#print("E: " + file_path)
 	if File.is_valid_resource(file_path):
+		if file_path.ends_with(".tscn.remap"): 
+			file_path = file_path.substr(0, file_path.length() - 6)
+			var file = load(file_path)
+			load_index += 1
+			#print("SECRET LOADR" + str(file))
+			return await handle_loaded_file(file, file_path)
 		chat("ResourceLoader load interactive: " + file_path)
 		var err = ResourceLoader.load_threaded_request(file_path, "", true, ResourceLoader.CACHE_MODE_REPLACE_DEEP)
 		if err == OK:
@@ -291,6 +297,8 @@ func _process(_delta):
 	if await update_unloaded_data_directory(): return
 	
 	var file_path:String = unloaded_data[unloaded_data_dir_idx][load_index]
+	#if file_path.ends_with(".tscn.remap"): file_path = file_path.substr(0, file_path.length() - 6)
+	
 	
 	if not is_loading_file:
 		try_load_next_file(file_path)
