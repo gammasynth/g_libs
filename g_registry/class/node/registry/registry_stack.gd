@@ -106,14 +106,15 @@ func gather_subregistry_paths() -> Error:
 
 func _gather_subregistry_paths() -> Error: return OK
 
-func search_for_loadable_content_by_name(path:String="res://", folder:String="debug"):
+func search_for_loadable_content_by_name(path:String="res://", folder:String="debug", excluding_folders:Array[String]=[]):
 	check_folder_for_folder(
 		path, 
 		folder, 
 		(func(n): directories_to_load.append(n)), 
 		true, 
 		(func(n): 
-			if not subregistry_paths.has(n) and not directories_to_load.has(n): return true
+			if not subregistry_paths.has(n) and not directories_to_load.has(n): 
+				if not excluding_folders.has(n) and not excluding_folders.has(n.get_base_dir()): return true
 			return false)
 	)
 
