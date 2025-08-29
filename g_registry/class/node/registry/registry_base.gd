@@ -230,9 +230,9 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 			real_folder_name = real_folder_name.left(real_folder_name.length() - 1)
 		if not group: 
 			group = await RegistryEntryGroup.find_group(real_folder_name, data)
-			if deep_debug: if group: chat(str("found group: " + group.group_name))
+			# BUG #if deep_debug: if group: chat(str("found group: " + group.group_name))
 		else:
-			if deep_debug: chat(str("existing group: " + group.group_name))
+			pass# BUG #if deep_debug: chat(str("existing group: " + group.group_name))
 		#if group or data.has(folder_name):
 			#has_registry_entry = true
 		
