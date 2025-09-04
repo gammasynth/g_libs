@@ -119,7 +119,7 @@ func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok
 	else: text = Text.color(text, clr)
 	
 	if chat_mirror_callable is Callable:
-		chat_mirror_callable.call(text)
+		chat_mirror_callable.call_deferred(text)
 	
 	if allow_chat:
 		print_rich(text)

@@ -10,5 +10,6 @@ static func color(text:String, with_color:COLORS, centered:bool=false) -> String
 	if centered: return center(text)
 	return text
 
-static func center(text:String) -> String:
+static func center(text:String, do:bool=true) -> String:
+	if not do: return text
 	return str("[center]" + text + "[/center]")
