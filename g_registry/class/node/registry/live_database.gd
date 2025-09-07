@@ -5,8 +5,9 @@ extends DatabaseNode
 ## See [Registry] for more use.
 class_name LiveDatabase
 
+signal data_paths_gathered(total_bytes_size:int)
 signal begin_load
-signal load_work
+signal load_work(bytes_size:int)
 signal finished_load
 
 @export var directories_to_load:Array[String] = []
@@ -29,7 +30,8 @@ var doing_load:bool = false
 var total_workload:int = 0
 var workload:int = 0
 
-var last_file_workload = 0
+var load_progress:Array=[0.0]
+var last_file_progress:float = 0.0
 
 var is_loading_file:bool = false
 var load_index = 0
@@ -37,8 +39,16 @@ var group_index = 0
 
 var load_tracker: LoadTracker
 
+func _initialized() -> void: set_process(false)
+
+func setup_new_load_tracker(under_tracker:LoadTracker=null) -> LoadTracker:
+	load_tracker = LoadTracker.new()
+	if under_tracker: under_tracker.add_subloader(load_tracker)
+	return load_tracker
+
 func _hookup_loader() -> Error:
 	if not load_tracker: return OK
+	data_paths_gathered.connect(load_tracker.setup_loader)
 	begin_load.connect(load_tracker.worker_started)
 	load_work.connect(load_tracker.worker_worked)
 	finished_load.connect(load_tracker.worker_finished)
@@ -101,15 +111,15 @@ func is_folder_library(folder_path:String) -> bool:
 func finish_load() -> bool:
 	chat("Load finished.")
 	load_is_finished = true
+	set_process(false)
 	await RenderingServer.frame_post_draw
 	emit_signal("finished_load")
 	doing_load = false
-	set_process(false)
 	return true
 
 func increment_load_directory() -> bool:
 	unloaded_data_dir_idx += 1
-	chat(str("Loading next directory: " + str(unloaded_data[unloaded_data_dir_idx])))
+	chatd(str("Loading next directory: " + str(unloaded_data[unloaded_data_dir_idx])))
 	load_index = 0
 	return true
 
@@ -138,15 +148,18 @@ func try_load_next_file(file_path:String) -> Variant:
 			load_index += 1
 			#print("SECRET LOADR" + str(file))
 			return await handle_loaded_file(file, file_path)
-		chat("ResourceLoader load interactive: " + file_path)
+		chatd("ResourceLoader load interactive: " + file_path)
 		var err = ResourceLoader.load_threaded_request(file_path, "", true, ResourceLoader.CACHE_MODE_REPLACE_DEEP)
 		if err == OK:
-			is_loading_file = true; return null
+			is_loading_file = true
+			return null
 	
 	var file = await File.try_load_file(file_path)
 	if not file:
-		chat("Error loading invalid user file: " + file_path + ", skipping!")
+		chatd("Error loading invalid user file: " + file_path + ", skipping!")
 		load_index += 1
+		unloaded_data_sizes.erase(file_path)
+		#recount_for_load_tracker()
 		return null
 	
 	return await handle_loaded_file(file, file_path)
@@ -160,7 +173,9 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 		if new_file is RegistryEntry:
 			file = new_file
 		
-		if new_file is Registry: return null
+		if new_file is Registry: 
+			unloaded_data_sizes.erase(file_path)
+			return null
 	
 	var file_name = File.get_file_name_from_file_path(file_path)
 	
@@ -169,7 +184,7 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 	if file_name.ends_with("_data"): 
 		valid_entry_file = true
 		has_data_tag = true
-		chat(str("loaded possible RegistryEntry file: " + file_name + ", trimming '_data' from file name."))
+		chatd(str("loaded possible RegistryEntry file: " + file_name + ", trimming '_data' from file name."))
 		file_name = file_name.substr(0, file_name.length() - "_data".length())
 	
 	var real_file_name = File.get_file_name_from_file_path(file_path, true)
@@ -203,19 +218,21 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 			if not group: group = await RegistryEntryGroup.find_group(folder_name, data)
 			if not group.data.has(entry_name):
 				if skip_loose_files:
-					chat("There is no loaded RegistryEntry for the following asset, skipping: " + file_path)
+					chatd("There is no loaded RegistryEntry for the following asset, skipping: " + file_path)
+					unloaded_data_sizes.erase(file_path)
+					#recount_for_load_tracker()
 					load_index += 1
 					is_loading_file = false
 					return null
 				else:
-					chat("making impromptu RegistryEntry in group: " + group.name + ", for file: " + real_file_name)
+					chatd("making impromptu RegistryEntry in group: " + group.name + ", for file: " + real_file_name)
 					#group.data[real_file_name] = RegistryEntry.make_entry(real_file_name)
 					group.add(RegistryEntry.make_entry(real_file_name), real_file_name)
 					entry_object = group.data.get(real_file_name)
 			else: 
 				var entry = group.grab(entry_name)
 				if entry is int:
-					chat("replacing placeholder for RegistryEntry in group: " + group.name + ", for file: " + real_file_name)
+					chatd("replacing placeholder for RegistryEntry in group: " + group.name + ", for file: " + real_file_name)
 					#group.data[entry_name] = 
 					group.erase(entry_name)
 					group.add(RegistryEntry.make_entry(entry_name), entry_name)
@@ -224,12 +241,14 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 		else:
 			if not db.has(entry_name): 
 				if skip_loose_files:
-					chat("There is no loaded RegistryEntry for the following asset, skipping: " + file_path)
+					chatd("There is no loaded RegistryEntry for the following asset, skipping: " + file_path)
+					unloaded_data_sizes.erase(file_path)
+					#recount_for_load_tracker()
 					load_index += 1
 					is_loading_file = false
 					return null
 				else:
-					chat("making impromptu RegistryEntry for file: " + real_file_name)
+					chatd("making impromptu RegistryEntry for file: " + real_file_name)
 					#data[real_file_name] = RegistryEntry.make_entry(real_file_name)
 					if db.has(real_file_name):
 						var v = db.grab(real_file_name)
@@ -240,7 +259,7 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 			else: 
 				var entry = db.grab(entry_name)
 				if entry is int:
-					chat("replacing placeholder for RegistryEntry in: " + db.name + ", for file: " + real_file_name)
+					chatd("replacing placeholder for RegistryEntry in: " + db.name + ", for file: " + real_file_name)
 					#group.data[entry_name] = 
 					var v = db.grab(real_file_name)
 					if v is int or element_is_folder: db.erase(entry_name)
@@ -248,7 +267,7 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 					entry = db.grab(entry_name)
 				entry_object = entry
 		
-		if not entry_object: if debug: push_error("DEBUG: Nil object returned instead of RegistryEntry for the following asset: " + file_path)
+		if not entry_object: if deep_debug: push_error("DEBUG: Nil object returned instead of RegistryEntry for the following asset: " + file_path)
 		entry_object.register_asset(real_file_name, file)
 	else:
 		if uses_groups:
@@ -267,7 +286,10 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 				if v is int or element_is_folder: db.erase(real_file_name)
 			db.add(file, real_file_name)
 	
+	
 	var file_size = unloaded_data_sizes[file_path]
+	
+	#recount_for_load_tracker()
 	load_work.emit(file_size)
 	
 	await RenderingServer.frame_post_draw
@@ -276,19 +298,26 @@ func handle_loaded_file(file:Variant, file_path:String) -> Variant:
 	is_loading_file = false
 	return file
 
+func recount_for_load_tracker():
+	var tfs:int = 0
+	for fp:String in unloaded_data_sizes.keys():
+		tfs += unloaded_data_sizes.get(fp)
+	load_tracker.modify_final_value(tfs)
 
 func handle_interactive_load(file_path:String) -> void:
 	var file_size = unloaded_data_sizes[file_path]
-	var load_progress = ResourceLoader.load_threaded_get_status(file_path, [1])
-	var this_workload = int(floor(load_progress * file_size))
-	
-	if last_file_workload == 0:
-		last_file_workload = this_workload
+	var load_status: = ResourceLoader.load_threaded_get_status(file_path, load_progress)
+	var prog:float=load_progress.get(0)
+	#print(prog)
+	if last_file_progress == 1.0:
+		last_file_progress = prog
 	else:
-		this_workload = this_workload - last_file_workload
+		prog = prog - last_file_progress
 	
-	if this_workload > 0:
-		load_work.emit(this_workload)
+	var this_workload = int(floor(prog * (file_size)))
+	
+	#if this_workload > 0:
+		#load_work.emit(this_workload)
 
 
 func _process(_delta):
@@ -310,8 +339,10 @@ func _process(_delta):
 			var file = ResourceLoader.load_threaded_get(file_path)
 			handle_loaded_file(file, file_path)
 		else:
-			chat(str("ResourceLoader LoadStatus Code: " + str(load_status)), Text.COLORS.red)
-			chat(str("REGISTRY FILE LOADING ERROR! File: " + file_path), Text.COLORS.red)
+			chatd(str("ResourceLoader LoadStatus Code: " + str(load_status)), Text.COLORS.red)
+			chatd(str("REGISTRY FILE LOADING ERROR! File: " + file_path), Text.COLORS.red)
+			unloaded_data_sizes.erase(file_path)
+			#recount_for_load_tracker()
 			#assert(false)
 			load_index += 1
 			is_loading_file = false

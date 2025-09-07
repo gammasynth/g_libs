@@ -55,7 +55,7 @@ func _init(_name:String="NODE_OBJ", _key:Variant=_name) -> void:
 	
 	db.name_changed.connect(func(n1, _n2): name = n1)
 	
-	await _initialized()
+	_initialized()
 	return
 func _initialized() -> void: return
 

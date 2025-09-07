@@ -5,28 +5,10 @@ class_name RegistryBase
 const REGISTRY_SCRIPT_PATH: String = "res://core/class/node/registry/registry.gd"
 
 var registry_path:String = REGISTRY_SCRIPT_PATH
-
+static var unnamed_registry_count:int = 0
 
 ## if boot_load, this Registry will run boot() after it runs start(), this is only useful if you do not use a ModularLoadingScreen for the Registry.
 @export var boot_load:bool = false
-
-
-func _init(_name:String="RegistryBase", _key:Variant=_name) -> void:
-	
-	if _name == "RegistryBase":
-		if not name.is_empty():
-			_name = name
-			_key = _name
-	
-	
-	name = _name
-	
-	db = Database.new(_name, _key)
-	db.name_changed.connect(func(n1, _n2): name = n1)
-	_initialized()
-	return
-func _initialized() -> void: return
-
 
 func _start() -> Error:
 	assert(name is StringName)
@@ -59,12 +41,20 @@ func _registry_started() -> Error: return OK
 
 
 
-func boot() -> Error:
+func boot() -> Error: 
 	return await boot_registry()
 
 func _boot_registry() -> Error:
-	# override this function to set name and what directories to load files from for this registry
-	if name == "RegistryBase": warn("un-named registry!"); db.name = "Un-Named Registry"
+	# override this function to change name and what directories_to_load to load files from for this registry
+	
+	# You do not need this code snippet below in your overrides of this function.
+	# - - - - - - - - -
+	if name == "RegistryBase": 
+		warn("un-named registry!")
+		unnamed_registry_count += 1
+		db.name = str("unnamed_registry_" + str(unnamed_registry_count))
+	# - - - - - - - - -
+	
 	directories_to_load = []
 	return OK
 
@@ -75,32 +65,56 @@ func boot_registry() -> Error:
 		print(" ")
 		chat("Booting Registry...", Text.COLORS.white)
 	
-	var err = await _boot_registry()
-	if err != OK:
-		chat("Booting error!", Text.COLORS.red)
-		return err
-	
+	#var err = await _boot_registry()
+	#if err != OK:
+		#chat("Booting error!", Text.COLORS.red)
+		#return err
+	var err:Error = OK
 	#var modded_registry_filepaths_array:Array = await boot_modded_files_for_registry()
 	
 	# This will need to be modified later to only load modded files if that mod is enabled.
 	#directories_to_load.append_array(modded_registry_filepaths_array) # currently not loading modded files
 	chat(name + " | " + "load directories: " + str(directories_to_load));
 	
-	err = await _registry_booting()
-	
 	err = await _hookup_loader()
 	if err != OK:
 		chat("Loader hookup error!", Text.COLORS.red)
 		#return err
 	
+	err = await _registry_booting()
+	
 	err = await load_registry_files()
 	if err: chat(str("loading error: " + error_string(err)))
-	
-	
 	
 	err = await boot_finished()
 	
 	return err
+
+
+func gather_content_to_load() -> void:
+	var dir_idx:int = 0
+	for directory in directories_to_load:
+		#if uses_entry_groups:
+			#handle_groups_collection(directory, dir_idx)
+		#else:
+			#collect_unloaded_directory_data(directory, dir_idx)
+		await handle_groups_collection(directory, dir_idx)
+		dir_idx += 1
+	
+	for dir in unloaded_data:
+		for new_data in unloaded_data[dir]:
+			var file := FileAccess.open(new_data, FileAccess.READ)
+			if not file: continue;
+			var file_size := file.get_length()
+			
+			
+			unloaded_data_sizes[new_data] = file_size
+			#if File.is_file_loadable(new_data):
+			total_workload += int(file_size)
+	
+	load_tracker.setup_loader(total_workload)
+	#data_paths_gathered.emit(total_workload)# BUG this should do the same as above line, but *doesnt* :o
+
 
 func _boot_finished() -> Error: return OK
 
@@ -127,37 +141,17 @@ func load_registry_files() -> Error:
 ## Called on each registry's [boot()].
 func _load_registry_files() -> Error:
 	
-	var dir_idx:int = 0
-	for directory in directories_to_load:
-		#if uses_entry_groups:
-			#handle_groups_collection(directory, dir_idx)
-		#else:
-			#collect_unloaded_directory_data(directory, dir_idx)
-		await handle_groups_collection(directory, dir_idx)
-		dir_idx += 1
-	
-	for dir in unloaded_data:
-		for new_data in unloaded_data[dir]:
-			var file := FileAccess.open(new_data, FileAccess.READ)
-			if not file: continue;
-			var file_size := file.get_length()
-			
-			unloaded_data_sizes[new_data] = file_size
-			
-			total_workload += int(floor(file_size))
-	
 	if not unloaded_data.is_empty():
 		if debug: 
-			for dir in unloaded_data: chat("found unloaded data: " + str(File.get_file_names_from_file_paths(Cast.array_string(unloaded_data[dir]), true)))
+			for dir in unloaded_data: chatd("found unloaded data: " + str(File.get_file_names_from_file_paths(Cast.array_string(unloaded_data[dir]), true)))
 		doing_load = true
-		begin_load.emit(total_workload)
-		
-		
+		begin_load.emit()
+		await RenderingServer.frame_post_draw
 	
 	await RenderingServer.frame_post_draw
 	if doing_load:
 		if debug: 
-			print(" ")
+			chat(" ")
 			chat("Loading files for regsitry...", Text.COLORS.white, true)
 		set_process(true)
 		await finished_load
@@ -185,7 +179,7 @@ func preestablish_registry_entry(entry_name:String, group:RegistryEntryGroup=nul
 	
 	if group:
 		if group.name == entry_name:
-			chat(("error: supposed RegistryEntry with same name as parent group: "), Text.COLORS.red)
+			warn(("error: supposed RegistryEntry with same name as parent group: "))
 			return ERR_BUG
 		group.add(val, entry_name)
 	else:
@@ -194,7 +188,7 @@ func preestablish_registry_entry(entry_name:String, group:RegistryEntryGroup=nul
 
 func collect_unloaded_directory_data(directory:String, dir_idx:int, group:RegistryEntryGroup=null) -> Error:
 	if debug: 
-		chat(str("Collecting data from directory: " + directory))
+		chatd(str("Collecting data from directory: " + directory))
 	
 	var filepaths = File.get_all_filepaths_from_directory(directory, "", true)
 	#print(filepaths)
@@ -245,7 +239,7 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 			if file_path.ends_with("_data.gd"):
 				#entry_name = file_path.left(file_path.length() - "_data.gd".length())
 				has_registry_entry = true
-				chat(str("found possible RegistryEntry file: " + file_path + ", moving to first priority for its directory load."))
+				chatd(str("found possible RegistryEntry file: " + file_path + ", moving to first priority for its directory load."))
 				ordered_unloaded_data_directory.append(file_path)
 				old_unloaded_data_directory.erase(file_path)
 				preestablish_registry_entry(folder_name, group)
@@ -259,7 +253,7 @@ func collect_unloaded_directory_data(directory:String, dir_idx:int, group:Regist
 			
 		
 		if not group and not has_registry_entry:
-			chat(str("creating RegistryEntry for folder: " + folder_name))
+			chatd(str("creating RegistryEntry for folder: " + folder_name))
 			#data[folder_name] = RegistryEntry.make_entry(folder_name)
 			var push:bool = true
 			if db.has(folder_name):
@@ -339,11 +333,11 @@ func create_group(group_path, parent_group, dir_idx) -> Error:
 	if parent_group:
 		#parent_group.data[group_name] = group
 		parent_group.add(group, group_name)
-		chat(str("creating subgroup: " + group_name + " , in parent group: " + parent_group.name))
+		chatd(str("creating subgroup: " + group_name + " , in parent group: " + parent_group.name))
 	else:
 		#data[group_name] = group
 		db.add(group, group_name)
-		chat(str("creating new group: " + group_name))
+		chatd(str("creating new group: " + group_name))
 	
 	if not group_folder_paths.has(group_name): group_folder_paths[group_name] = group_path
 	

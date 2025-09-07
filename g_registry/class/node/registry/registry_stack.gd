@@ -19,10 +19,7 @@ static var registry_count:int = 0
 
 ## If a Registry has Subregistries (other Registries as the elements it contains), we can reference them by their name as a key in subregistries dictionary.
 ## subregistries property is simply a reference to the data property.
-var subregistries = {}:
-	get: 
-		if subregistry_paths.size() > 0: return data
-		return {}
+var subregistries = {}
 
 var booted_subregistries:int = 0
 
@@ -90,7 +87,7 @@ func _start_registry() -> Error:
 
 func _registry_started() -> Error:
 	if debug and instance == self: 
-		print(" ")
+		chat(" ")
 		chat("All registries started.", Text.COLORS.cyan)
 	return OK
 
@@ -121,9 +118,7 @@ func search_for_loadable_content_by_name(path:String="res://", folder:String="de
 
 func _registry_booting() -> Error:
 	if registry_count > 1: registries[name] = self
-	return OK
-
-func _boot_finished() -> Error:
+	
 	var err = OK
 	if debug:
 		chat(str("contains subregistries: " + str(subregistries.size() > 0)))	
@@ -131,7 +126,9 @@ func _boot_finished() -> Error:
 	if subregistries.size() > 0: 
 		chat("Booting subregistries...")
 		err = await boot_subregistries()
-	return err
+	
+	return OK
+
 
 func create_registries() -> Error:
 	chat("Creating Subregistries...", Text.COLORS.white)
@@ -197,34 +194,30 @@ func create_subregistry(script_path:String=REGISTRY_SCRIPT_PATH) -> Registry:
 	loaded_script = script.new(subregistry_name)
 	
 	var subregistry : Registry = loaded_script
-	
-	#add_child(subregistry, true)
 	subregistry.registry_path = script_path
 	
+	subregistry.setup_new_load_tracker(load_tracker)
+	
 	await Make.child(subregistry, self)
-	
-	#subregistries[subregistry_name] = subregistry
-	
-	#if not subregistry.is_node_ready():
-		#await subregistry.ready
+	subregistries.set(subregistry_name, subregistry)
 	
 	await subregistry.start()
 	
 	return subregistry
 
-
+func gather_all_content_to_load() -> void:
+	
+	for subregistry_name in subregistries:
+		var subregistry:Registry = subregistries.get(subregistry_name)
+		await subregistry.gather_all_content_to_load()
+	
+	var err = await _boot_registry()
+	if err != OK:
+		warn("Booting error!", err)
+	await gather_content_to_load()
 
 func boot_subregistries() -> Error:
 	for subregistry in get_children():
 		await subregistry.boot_registry()
 	chat("All subregistries booted!", Text.COLORS.white)
 	return OK
-
-
-func registry_finished() -> Error:
-	if not subregistries.size() > 0: return await boot_finished()
-	booted_subregistries += 1
-	if booted_subregistries >= get_child_count():
-		# we have finished loading all registries
-		return await boot_finished()
-	return ERR_CANT_RESOLVE

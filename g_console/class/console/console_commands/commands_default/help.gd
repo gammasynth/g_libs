@@ -9,7 +9,7 @@ func _setup_command() -> void:
 	return
 
 
-func _perform_command(text_line:String) -> bool:
+func _perform_command(_text_line:String) -> bool:
 	console.print_out("command: help")
 	
 	for library_name:String in console.parser.console_command_library_names:

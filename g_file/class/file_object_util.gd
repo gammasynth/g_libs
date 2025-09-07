@@ -737,27 +737,34 @@ static func load_audio(file_path:String) -> AudioStreamMP3:
 	stream.data = buffer
 	return stream
 
+static func is_file_loadable(file_path:String, only_user_files:bool=false) -> bool:
+	if only_user_files and not FileUtil.is_user_dir(file_path): return false
+	
+	var is_godot_resource:bool = FileUtil.is_valid_godot_resource(file_path)
+	var is_image_resource:bool = FileUtil.is_valid_image_resource(file_path)
+	var is_audio_resource:bool = FileUtil.is_valid_audio_resource(file_path)
+	var is_script_resource:bool = FileUtil.is_valid_gd_script_file(file_path)
+	
+	if is_godot_resource or is_image_resource or is_audio_resource or is_script_resource: return true
+	return false
 
-static func try_load_file(file_path:String, only_user_files:bool=false) -> Variant:
+static func try_load_file(file_path:String, only_user_files:bool=false) -> Variant:#$load_godot_files:bool=false, 
 	if only_user_files and not FileUtil.is_user_dir(file_path): return null
-	var is_godot_resource:bool = false
-	var is_image_resource:bool = false
-	var is_audio_resource:bool = false
-	var is_script_resource:bool = false
 	
 	var is_valid:bool = true
-	
-	if FileUtil.is_valid_godot_resource(file_path): is_godot_resource = true
-	elif FileUtil.is_valid_image_resource(file_path): is_image_resource = true;
-	elif FileUtil.is_valid_audio_resource(file_path): is_audio_resource = true;
-	elif FileUtil.is_valid_gd_script_file(file_path): is_script_resource = true;
-	else: is_valid = false;
+	var is_godot_resource:bool = FileUtil.is_valid_godot_resource(file_path)
+	var is_image_resource:bool = FileUtil.is_valid_image_resource(file_path)
+	var is_audio_resource:bool = FileUtil.is_valid_audio_resource(file_path)
+	var is_script_resource:bool = FileUtil.is_valid_gd_script_file(file_path)
+	if is_godot_resource or is_image_resource or is_audio_resource or is_script_resource: is_valid = true
 	
 	if not is_valid: return null
 	
 	if is_image_resource: return load_image(file_path)
 	elif is_audio_resource: return load_audio(file_path)
 	elif is_script_resource: return load_gdscript_file(file_path)
+	#elif load_godot_files and is_godot_resource: return load()
+	# this function doesnt load other files like tscns or materials, etc, at this time
 	else: return null
 
 #endregion

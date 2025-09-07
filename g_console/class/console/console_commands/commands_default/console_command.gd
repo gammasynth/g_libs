@@ -36,9 +36,9 @@ func try_parse_line(text_line:String) -> bool:
 	return false
 
 
-func _try_parse_line(text_line:String) -> bool:
+func _try_parse_line(_text_line:String) -> bool:
 	return false
 
 
-func _perform_command(text_line:String) -> bool:
+func _perform_command(_text_line:String) -> bool:
 	return false

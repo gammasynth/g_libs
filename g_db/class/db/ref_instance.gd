@@ -108,18 +108,20 @@ func _finish_tick() -> Error: return OK
 func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok:bool=false) -> Variant:
 	if not debug and not force: return
 	
+	var empty:bool=false
 	if text.is_empty() or text == " ":
-		pass
+		empty = true
 	elif text.begins_with("^&"):
 		text = text.substr(2)
 	else:
 		if not persona.is_empty(): text = str(persona + " | " + text)
 	
-	if clr is int and clr == -1: pass
-	else: text = Text.color(text, clr)
+	if not empty:
+		if clr is int and clr == -1: pass
+		else: text = Text.color(text, clr)
 	
 	if chat_mirror_callable is Callable:
-		chat_mirror_callable.call_deferred(text)
+		chat_mirror_callable.call(text)
 	
 	if allow_chat:
 		print_rich(text)
@@ -128,7 +130,9 @@ func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok
 	return null
 
 ## [chatd] will force a [chat] during [deep_debug].
-func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: return chat(text, clr, deep_debug, return_ok)
+func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: 
+	if deep_debug: return chat(text, clr, deep_debug, return_ok)
+	else: return 
 
 ## [warn] can be called with just text to [chat] a red message. [br] [br]
 ## If [warn] is called with an Error code passed as a second parameter, it will: [br]

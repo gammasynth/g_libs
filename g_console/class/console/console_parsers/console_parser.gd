@@ -45,7 +45,7 @@ func parse_text_line(text_line:String) -> Error:
 	return err
 
 
-func _parse_text_line(text_line:String) -> Error: 
+func _parse_text_line(_text_line:String) -> Error: 
 	#var operated: bool = false
 	
 	# First, you should check all commands from Registry to see if one runs. If not, let code below run.
@@ -100,5 +100,5 @@ func _default_console_parse(text_line:String) -> Error:
 func fallback_console_parse(text_line:String) -> Error:
 	return await _fallback_console_parse(text_line)
 
-func _fallback_console_parse(text_line:String) -> Error:
+func _fallback_console_parse(_text_line:String) -> Error:
 	return OK

@@ -194,7 +194,7 @@ static func load_image(file_path:String) -> Texture2D: return FileObjectUtil.loa
 ## @experimental
 static func load_audio(file_path:String) -> AudioStreamMP3: return FileObjectUtil.load_audio(file_path)
 
-
+static func is_file_loadable(file_path:String, only_user_files:bool=false) -> bool: return FileObjectUtil.is_file_loadable(file_path, only_user_files)
 static func try_load_file(file_path:String, only_user_files:bool=false) -> Variant: return FileObjectUtil.try_load_file(file_path, only_user_files)
 
 #endregion

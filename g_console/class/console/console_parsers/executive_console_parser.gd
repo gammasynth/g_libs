@@ -10,7 +10,7 @@ func _get_console_command_library_names() -> Array[String]:
 
 func _fallback_console_parse(text_line:String) -> Error:
 	var operated: bool = false
-	var extension: String = text_line.get_extension()
+	var _extension: String = text_line.get_extension()
 	
 	# First, you should check all commands from Registry to see if one runs. If not, let code below run.
 	# TODO
