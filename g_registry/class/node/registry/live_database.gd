@@ -156,7 +156,11 @@ func try_load_next_file(file_path:String) -> Variant:
 	
 	var file = await File.try_load_file(file_path)
 	if not file:
+<<<<<<< Updated upstream
 		chatd("Error loading invalid user file: " + file_path + ", skipping!")
+=======
+		if not file: chat("Error loading invalid user file: " + file_path + ", skipping!")
+>>>>>>> Stashed changes
 		load_index += 1
 		unloaded_data_sizes.erase(file_path)
 		#recount_for_load_tracker()

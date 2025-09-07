@@ -2,7 +2,7 @@ extends Registry
 
 func _gather_subregistry_paths() -> Error:
 	#subregistry_paths.append("res://src/registry/entities/items.gd")
-	check_library_for_registries("res://", true, "debug")
+	if debug or deep_debug: check_library_for_registries("res://", true, "debug")
 	return OK
 
 func _boot_registry():
