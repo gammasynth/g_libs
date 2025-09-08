@@ -4,13 +4,13 @@ class_name ConsoleParser
 
 var console:Console
 
-var need_operation: bool = false
+var started_operating:bool=false
 var did_operate: bool = false:
 	set(b):
 		did_operate = b
-		if b and need_operation: 
-			need_operation = false
+		if b and console.operating: 
 			did_operate = false
+			console.operating = false
 
 var console_command_library_names: Array[String]: get = _get_console_command_library_names
 func _get_console_command_library_names() -> Array[String]:
@@ -27,36 +27,28 @@ func parse_text_line(text_line:String) -> Error:
 		# here is where we can introduce a "parse line queue"
 		return ERR_BUSY# TODO
 	console.operating = true
-	need_operation = true
 	
 	var err: Error = await _parse_text_line(text_line)
 	warn("_parse_text_line", err)
 	
-	if need_operation and not did_operate:
+	if console.operating and not did_operate:
 		err = await default_console_parse(text_line)
 		warn("default_console_parse", err)
 	
-	if need_operation and not did_operate:
+	if console.operating and not did_operate:
 		err = await fallback_console_parse(text_line)
 		warn("fallback_console_parse", err)
 	
-	console.operating = false
-	need_operation = false
 	return err
 
 
 func _parse_text_line(_text_line:String) -> Error: 
-	#var operated: bool = false
-	
-	# First, you should check all commands from Registry to see if one runs. If not, let code below run.
-	# TODO
-	# !!!
-	# Registry.get_registry("console_commands")
-	# set operated = true when doing a command
-	# !!!
-	# TODO
-	
-	# default non-command behavior below
+	# override this function in an extended parser to change the primary parsing functionality
+	#
+	# set the bool did_operate to true when you do handle a text/command
+	#
+	# if you do not set did_operate to true, 
+	# then the default and/or fallback parses will try to run after this function
 	return OK
 
 

@@ -16,16 +16,16 @@ static func string_to_vector2(string := "") -> Vector2:
 
 
 
-static func deserialize_object(dict:Dictionary) -> Object:
+static func deserialize_object(dict:Dictionary, _obj:Object=null) -> Object:
 	
 	if current_dictionary.is_empty(): 
 		current_dictionary = dict
 		dict = current_dictionary
 	
-	var obj: Object = null
+	var obj: Object = _obj
 	
-	var script: GDScript = null
-	if dict.has("SERIALIZED_OBJECT_SCRIPT_PATH"):
+	var script: GDScript = null; if obj and obj.get_script() is GDScript: script = obj.get_script()
+	if not script and dict.has("SERIALIZED_OBJECT_SCRIPT_PATH"):
 		var script_path = dict["SERIALIZED_OBJECT_SCRIPT_PATH"]
 		script = load(script_path)
 		obj = script.new()

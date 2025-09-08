@@ -5,7 +5,7 @@ class_name ExecutiveConsoleParser
 
 func _get_console_command_library_names() -> Array[String]:
 	if not console_command_library_names.is_empty(): return console_command_library_names
-	return ["console_commands", "executive_commands"]
+	return ["console_commands"]
 
 
 func _fallback_console_parse(text_line:String) -> Error:
@@ -55,9 +55,10 @@ func _fallback_console_parse(text_line:String) -> Error:
 	if not operated: operated = is_text_line_a_subfolder(text_line)
 	
 	if not operated:
-		chat(str(console.current_directory_path + text_line), -1, true)
+		console.print_out(str(text_line))
 		console.execute(text_line)
-		operated = true
+		#operated = true
+		# console executes on thread, so did_operate will set in a later function after the thread
 	
 	if operated: did_operate = true
 	# - - -
