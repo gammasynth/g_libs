@@ -1,4 +1,4 @@
-extends Console
+extends FileConsole
 
 ## The ExecutiveConsole was made for the OmniConsole extension of it. See https://gammasynth.com/omni
 ## Be advised, one should uses_threads or uses_piped, but probably not both, but both might work, - 
@@ -8,15 +8,10 @@ extends Console
 ## If you do not plan to be operating shell commands in the OS of your app, you should use Console instead of ExecutiveConsole.
 class_name ExecutiveConsole
 
-signal directory_focus_changed(new_current_path:String)
 signal thread_process_started
 signal pipe_process_started
 signal process_started
 
-var current_directory_path: String = "C:/":
-	set(path):
-		current_directory_path = path
-		directory_focus_changed.emit(path)
 
 @export var uses_threads:bool = false
 @export var uses_piped:bool=false
@@ -34,6 +29,8 @@ var execution_mutex:Mutex = Mutex.new()
 var thread_time:float = 0.0
 
 var long_process:bool=false
+var refresh_rate := 0.1
+var refresh_delta := 0.0
 
 var console_processing:bool=false:
 	set(b):
@@ -45,7 +42,8 @@ var console_processing:bool=false:
 
 func _get_parser():
 	if parser: return parser
-	return ExecutiveConsoleParser.new(self)
+	parser = ExecutiveConsoleParser.new(self)
+	return parser
 
 func _init(_name:String="executive_console", _key:Variant=_name) -> void:
 	super(_name, _key)
@@ -80,6 +78,7 @@ func execute(order:String) -> void:
 		if piping: can_accept_entry = true
 		command_entered_print(output)
 		if operating: parser.did_operate = true
+		
 
 func execute_threaded(order:String) -> Array: return perform_execution(order)
 
@@ -143,10 +142,12 @@ func perform_piped_execution(order:String) -> Array:
 			pipe_stdio = output_dictionary.get("stdio")
 			pipe_stderr = output_dictionary.get("stderr")
 			pipe_pid = output_dictionary.get("pid")
+			print("COMMAND PID: " + str(pipe_pid))
+			print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
 			is_piping = true
 			if pipe_stdio is FileAccess and pipe_stdio.is_open(): pass
 			else: stop_pipe()
-			output = ["Processing..."]
+			output = [order, "Processing..."]
 	execution_mutex.unlock()
 	return output
 
@@ -193,7 +194,7 @@ func get_pipe_io() -> Array:
 		else: lines.append(line)
 	
 	#if failed_stdio and failed_stderr: stop_pipe()
-	
+	#print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
 	if not lines.is_empty(): 
 		received_pipe_data = true
 		pipe_time = 0.0
@@ -204,6 +205,11 @@ func print_pipe_io() -> void: print_out(get_pipe_io())
 
 func process(delta: float) -> void:# this can be called externally for threaded operations, you must call it, this function is not called on its own
 	if not console_processing: return
+	
+	refresh_delta += delta
+	if refresh_delta >= refresh_rate: 
+		refresh.call_deferred()
+		refresh_delta = 0.0
 	
 	if uses_piped:
 		print_pipe_io()
@@ -234,20 +240,22 @@ func process(delta: float) -> void:# this can be called externally for threaded 
 	execution_mutex.lock()
 	if uses_piped and console_processing and is_piping:
 		if pipe_stdio is FileAccess and pipe_stdio.is_open():
-			pipe_time += 1.0 * delta
-			if received_pipe_data:
-				if pipe_time > 1.0: # pipe_time is reset to 0 every time received_pipe_data reads an io line, so this is 2.5s of empty console post-command
-					# TEST this may not be sufficient for long-running processes such as servers
-					stop_pipe()
-			
-			if is_piping and pipe_time > 2.5:
-				if not long_process: 
-					# give app a console_cancel Input
-					var keys_msg:String = ""
-					for key:String in console_cancel_input_names:
-						keys_msg = str(keys_msg + key + ", ")
-					print_out("Process may be stuck, use " + keys_msg + " or close program to force close the operation.")
-					long_process = true
+			if not OS.is_process_running(pipe_pid): stop_pipe()
+			else:
+				pipe_time += 1.0 * delta
+				#if received_pipe_data:
+					#if pipe_time > 1.0: # pipe_time is reset to 0 every time received_pipe_data reads an io line, so this is 2.5s of empty console post-command
+						# TEST this may not be sufficient for long-running processes such as servers
+						#stop_pipe()
+				
+				if is_piping and pipe_time > 2.5:
+					if not long_process: 
+						# give app a console_cancel Input
+						var keys_msg:String = ""
+						for key:String in console_cancel_input_names:
+							keys_msg = str(keys_msg + key + ", ")
+						print_out("Process may be stuck, use " + keys_msg + " or close program to force close the operation.")
+						long_process = true
 			
 		else: stop_pipe()
 	
@@ -262,7 +270,7 @@ func force_stop_pipe() -> void:
 func stop_pipe() -> void:
 	execution_mutex.lock()
 	pipe_time = 0.0
-	
+	long_process = false
 	if pipe_pid != -1: OS.kill(pipe_pid)
 	pipe_pid = -1
 	
@@ -275,12 +283,13 @@ func stop_pipe() -> void:
 func finish_execution(output:Array) -> void:
 	command_entered_print(output)
 	console_processing = false
-	if operating: parser.did_operate = true
+	if operating: 
+		parser.did_operate = false
+		operating = false
+	refresh_delta = 0.0
+	refresh()
 
 func command_entered_print(output:Array, print_command:bool=true) -> void:
 	chat(str(output), -1, true)
 	if print_command and not uses_piped: print_out(command_history.get(command_history.size() - 1))
 	print_out(output)
-
-func open_directory(at_path:String=current_directory_path) -> void: _open_directory(at_path)
-func _open_directory(at_path:String=current_directory_path) -> void: current_directory_path = at_path

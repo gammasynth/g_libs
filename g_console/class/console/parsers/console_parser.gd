@@ -12,10 +12,10 @@ var did_operate: bool = false:
 			did_operate = false
 			console.operating = false
 
-var console_command_library_names: Array[String]: get = _get_console_command_library_names
-func _get_console_command_library_names() -> Array[String]:
+var console_command_library_names: Dictionary[String, Array]: get = _get_console_command_library_names
+func _get_console_command_library_names() -> Dictionary[String, Array]:
 	if not console_command_library_names.is_empty(): return console_command_library_names
-	return ["console_commands"]
+	return {"console_commands" : ["commands"]} # String Registry name : Array[String] [RegistryEntry names]
 
 
 func _init(_console:Console=null, _name:String="console_parser", _key:Variant=_name) -> void:
@@ -58,30 +58,35 @@ func default_console_parse(text_line:String) -> Error:
 
 func _default_console_parse(text_line:String) -> Error:
 	var operated: bool = false
-	for library_name:String in console_command_library_names:
+	for registry_name:String in console_command_library_names:
 		if operated: break
 		
-		var library: Registry = Registry.get_registry(library_name)
-		if not library:
-			warn(str("invalid library name, nonexistent registry: " + library_name))
+		var registry: Registry = Registry.get_registry(registry_name)
+		if not registry:
+			warn(str("invalid library name, nonexistent Registry: " + registry_name))
 			continue
 		
-		for command_key in library.data:
+		var library_names:Array = console_command_library_names.get(registry_name)
+		for library_name:String in library_names:
 			if operated: break
+			var library:RegistryEntry = registry.grab(library_name)
+			if not library:
+				warn(str("invalid library name, nonexistent RegistryEntry: " + library_name))
+				continue
 			
-			var command_script = library.grab(command_key)
-			if not command_script or command_script and command_script is not GDScript:
-				warn("null command_script", ERR_FILE_UNRECOGNIZED, false); continue
-			
-			var command: ConsoleCommand = command_script.new()
-			if not command or command is not ConsoleCommand:
-				warn("bad command class instance"); continue
-			command.console = console
-			
-			var accepted: bool = await command.try_parse_line(text_line)
-			if accepted:
-				operated = true
-				break
+			for command_key in library.data:
+				var command_script = library.grab(command_key)
+				if not command_script or command_script and command_script is not GDScript:
+					warn("null command_script", ERR_FILE_UNRECOGNIZED, false); continue
+				
+				var command: ConsoleCommand = command_script.new(console)
+				if not command or command is not ConsoleCommand:
+					warn("bad command class instance"); continue
+				
+				var accepted: bool = await command.try_parse_line(text_line)
+				if accepted:
+					operated = true
+					break
 		
 	
 	if operated: did_operate = true
