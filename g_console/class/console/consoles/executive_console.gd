@@ -24,18 +24,23 @@ var pipe_time:float = 0.0
 
 var received_pipe_data:bool=false
 
+var monitor_thread:Thread = null
+
 var execution_thread:Thread = null
 var execution_mutex:Mutex = Mutex.new()
 var thread_time:float = 0.0
 
 var long_process:bool=false
+
+var refresh_during_process:bool=true
 var refresh_rate := 0.1
 var refresh_delta := 0.0
 
+var uses_process:bool=false
 var console_processing:bool=false:
 	set(b):
-		if b and uses_threads: thread_process_started.emit()
-		if b and uses_piped: pipe_process_started.emit()
+		if b and uses_threads: if uses_process: thread_process_started.emit()
+		if b and uses_piped: if uses_process: pipe_process_started.emit()
 		console_processing = b
 
 @export var console_cancel_input_names:Array[String] = ["x", "esc", "control+c"]
@@ -55,14 +60,18 @@ func cancel_threaded_execution() -> void:
 
 func process_was_started() -> void: process_started.emit()
 
+
 func execute(order:String) -> void:
-	var output:Array = ["processing"]
+	var output:Array = ["Processing...", " "]
 	console_processing = true
 	if uses_threads:
-		thread_time = 0.0
-		long_process = false
-		execution_thread = Thread.new()
-		execution_thread.start(execute_threaded.bind(order))
+		if uses_piped:
+			output = perform_execution(order)
+		else:
+			thread_time = 0.0
+			long_process = false
+			execution_thread = Thread.new()
+			execution_thread.start(execute_threaded.bind(order))
 	else: output = perform_execution(order)
 	
 	var piping:bool = false
@@ -78,97 +87,136 @@ func execute(order:String) -> void:
 		if piping: can_accept_entry = true
 		command_entered_print(output)
 		if operating: parser.did_operate = true
-		
+		if uses_threads and not uses_process:
+			monitor_thread = Thread.new()
+			if uses_piped:
+				execution_mutex.lock()
+				monitor_thread.start(threaded_pipe_loop.bind(pipe_pid, pipe_stdio))
+				execution_mutex.unlock()
+			else:
+				monitor_thread.start(threaded_loop)
+
+func threaded_loop() -> void:
+	while execution_thread.is_started() and execution_thread.is_alive():
+		if not execution_thread.is_alive(): break
+
+func threaded_pipe_loop(pid:int, stdio:FileAccess) -> void:
+	while stdio is FileAccess and stdio.is_open():
+		print_pipe_io()
+		if not OS.is_process_running(pid): stop_pipe()
 
 func execute_threaded(order:String) -> Array: return perform_execution(order)
 
 func perform_execution(order:String) -> Array:
 	var output:Array = []
-	if uses_piped: output = perform_piped_execution(order)
+	if uses_piped: output = perform_piped_execution(current_directory_path, order, uses_threads)
 	else: output = perform_classic_execution(order)
 	return output
 
-func perform_piped_execution(order:String) -> Array:
+func perform_piped_execution(at_path:String, order:String, blocking:bool=false) -> Array:
 	execution_mutex.lock()
 	received_pipe_data = false
+	
 	var output:Array = []# output and stderr from command run
 	if is_piping and pipe_pid != -1 and pipe_stdio is FileAccess and pipe_stdio.is_open():
-		
-		pipe_stdio.store_line(order)
-		pipe_stdio.flush()
+		if not pipe_stdio.store_line(order): print("CANT SEND NEW COMMAND!")
+		pipe_stdio.flush()# This appears to not work, both these lines. Console pipe doesnt react to additional commands.
+		execution_mutex.unlock()
+		return [order]
+	
+	var output_dictionary:Dictionary = {}
+	#
+	# TODO IMPLEMENT OTHER OS TERMINALS
+	if OS.get_name() == "Windows":
+		var args:Array = [
+			"/C", 
+			str("cd " + at_path + " && " + order)#,
+			#str("cd " + current_directory_path + " && " + "echo.>OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
+			]
+		output_dictionary = OS.execute_with_pipe("CMD.exe", args, blocking)
+	elif OS.get_name() == "Linux":
+		var args:Array = [
+			"-c",
+			str("cd " + at_path + " && " + order)#,
+			#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
+			]
+		output_dictionary = OS.execute_with_pipe("/bin/sh", args, blocking)
+	elif OS.get_name() == "Android":
+		var args:Array = [
+			"-c",
+			str("cd " + at_path + " && " + order)#,
+			#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
+			]
+		# TODO PLS implement Android give system perms
+		output_dictionary = OS.execute_with_pipe("/system/bin/sh", args, blocking)
 	else:
-		var output_dictionary:Dictionary = {}
-		#
-		# TODO IMPLEMENT OTHER OS TERMINALS
-		if OS.get_name() == "Windows":
-			var args:Array = [
-				"/C", 
-				str("cd " + current_directory_path + " && " + order)#,
-				#str("cd " + current_directory_path + " && " + "echo.>OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
-				]
-			output_dictionary = OS.execute_with_pipe("CMD.exe", args, false)
-		elif OS.get_name() == "Linux":
-			var args:Array = [
-				"-c",
-				str("cd " + current_directory_path + " && " + order)#,
-				#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
-				]
-			output_dictionary = OS.execute_with_pipe("/bin/sh", args, false)
-		elif OS.get_name() == "Android":
-			var args:Array = [
-				"-c",
-				str("cd " + current_directory_path + " && " + order)#,
-				#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
-				]
-			# TODO PLS implement Android give system perms
-			output_dictionary = OS.execute_with_pipe("/system/bin/sh", args, false)
-		else:
-			var args:Array = [
-				"-c",
-				str("cd " + current_directory_path + " && " + order)#,
-				#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
-				]
-			# TODO TEST IF THIS IS SUFFICIENT FOR OTHER SYSTEMS TODO TEST
-			output_dictionary = OS.execute_with_pipe("/bin/sh", args, false)
-		
-		#- "stdio" - FileAccess to access the process stdin and stdout pipes (read/write).
-		#- "stderr" - FileAccess to access the process stderr pipe (read only).
-		#- "pid" - Process ID as an int, which you can use to monitor the process (and potentially terminate it with kill()).
-		
-		if output_dictionary == null or output_dictionary is Dictionary and output_dictionary.size() == 0:
-			stop_pipe()
-			output = ["Command failed, or nothing happened."]
-		else:
-			pipe_stdio = output_dictionary.get("stdio")
-			pipe_stderr = output_dictionary.get("stderr")
-			pipe_pid = output_dictionary.get("pid")
-			print("COMMAND PID: " + str(pipe_pid))
-			print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
-			is_piping = true
-			if pipe_stdio is FileAccess and pipe_stdio.is_open(): pass
-			else: stop_pipe()
-			output = [order, "Processing..."]
+		var args:Array = [
+			"-c",
+			str("cd " + at_path + " && " + order)#,
+			#str("cd " + current_directory_path + " && " + "touch OMNI_OPERATED.oco")# BUG track files as args doesnt work this current setup way
+			]
+		# TODO TEST IF THIS IS SUFFICIENT FOR OTHER SYSTEMS TODO TEST
+		output_dictionary = OS.execute_with_pipe("/bin/sh", args, blocking)
+	
+	#- "stdio" - FileAccess to access the process stdin and stdout pipes (read/write).
+	#- "stderr" - FileAccess to access the process stderr pipe (read only).
+	#- "pid" - Process ID as an int, which you can use to monitor the process (and potentially terminate it with kill()).
+	
+	if output_dictionary == null or output_dictionary is Dictionary and output_dictionary.size() == 0:
+		stop_pipe()
+		return [" ", "Command failed, or nothing happened."]
+	
+	execution_mutex.lock()
+	pipe_stdio = output_dictionary.get("stdio")
+	pipe_stderr = output_dictionary.get("stderr")
+	pipe_pid = output_dictionary.get("pid")
+	#print("COMMAND PID: " + str(pipe_pid))
+	#print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
+	is_piping = true
+	if pipe_stdio is FileAccess and pipe_stdio.is_open(): pass
+	else: stop_pipe()
+	output = [" ", "Processing..."]
 	execution_mutex.unlock()
 	return output
 
-func perform_classic_execution(order:String) -> Array:
+func perform_classic_execution(order:String, open_console:bool=false, read_stderr:bool=true) -> Array:
 	var output:Array = []# output and stderr from command run
 	var args:Array = ["-c", order]
 	# TODO IMPLEMENT OTHER OS TERMINALS
 	if OS.get_name() == "Windows":
 		var this_command_arg:String = str("cd " + current_directory_path + " && " + order)
 		args = ["/C", this_command_arg]
-		OS.execute("CMD.exe", args, output, true, false)
+		OS.execute("CMD.exe", args, output, read_stderr, open_console)
 	elif OS.get_name() == "Linux":
-		OS.execute("/bin/sh", args, output, true, false)
+		OS.execute("/bin/sh", args, output, read_stderr, open_console)
 	elif OS.get_name() == "Android":
 		# TODO PLS implement Android give system perms
-		OS.execute("/system/bin/sh", args, output, true, false)
+		OS.execute("/system/bin/sh", args, output, read_stderr, open_console)
 	else:
 		# TODO TEST IF THIS IS SUFFICIENT FOR OTHER SYSTEMS TODO TEST
-		OS.execute("/bin/sh", args, output, true, false)
+		OS.execute("/bin/sh", args, output, read_stderr, open_console)
 	#
 	return output
+
+## Runnable Execution will create a new seperate OS process/program/window for the command terminal.
+## Returns the int pid of the new terminal process, if created and valid.
+func perform_runnable_execution(order:String) -> int:
+	var new_pid:int = -1# output and stderr from command run
+	var args:Array = ["-c", order]
+	# TODO IMPLEMENT OTHER OS TERMINALS
+	if OS.get_name() == "Windows":
+		args = ["/C", str("cd " + current_directory_path + " && " + order)]
+		new_pid = OS.create_process("CMD.exe", args, true)
+	elif OS.get_name() == "Linux":
+		new_pid = OS.create_process("/bin/sh", args, true)
+	elif OS.get_name() == "Android":
+		# TODO PLS implement Android give system perms
+		new_pid = OS.create_process("/system/bin/sh", args, true)
+	else:
+		# TODO TEST IF THIS IS SUFFICIENT FOR OTHER SYSTEMS TODO TEST
+		new_pid = OS.create_process("/bin/sh", args, true)
+	#
+	return new_pid
 
 func get_pipe_io() -> Array:
 	execution_mutex.lock()
@@ -195,7 +243,16 @@ func get_pipe_io() -> Array:
 	
 	#if failed_stdio and failed_stderr: stop_pipe()
 	#print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
+	var lines_cleaned:Array = []
 	if not lines.is_empty(): 
+		for line:String in lines:
+			lines_cleaned.append(line)
+			for rni in line.count(("\r\n" as String)):
+				lines_cleaned.append(" ")
+				#print("SPECIAL CHARACTERS")
+			for ni in line.count(("\n" as String)):
+				lines_cleaned.append(" ")
+				#print("SPECIAL CHARACTERS")
 		received_pipe_data = true
 		pipe_time = 0.0
 	execution_mutex.unlock()
@@ -206,10 +263,11 @@ func print_pipe_io() -> void: print_out(get_pipe_io())
 func process(delta: float) -> void:# this can be called externally for threaded operations, you must call it, this function is not called on its own
 	if not console_processing: return
 	
-	refresh_delta += delta
-	if refresh_delta >= refresh_rate: 
-		refresh.call_deferred()
-		refresh_delta = 0.0
+	if refresh_during_process:
+		refresh_delta += delta
+		if refresh_delta >= refresh_rate: 
+			refresh.call_deferred()
+			refresh_delta = 0.0
 	
 	if uses_piped:
 		print_pipe_io()
@@ -219,7 +277,7 @@ func process(delta: float) -> void:# this can be called externally for threaded 
 			#if line != "":
 				#print("Error: ", line)
 	
-	if uses_threads:
+	if uses_threads and not uses_piped:
 		if execution_thread == null: return
 		
 		if execution_thread.is_started():
@@ -228,7 +286,7 @@ func process(delta: float) -> void:# this can be called externally for threaded 
 				if thread_time >= 3.0:
 					if not long_process: 
 						# there is no way to fix this, you can not cancel an execution that is unfinished without piping
-						print_out("Process may be stuck, close program to force close the operation.")
+						print_out([" ", "Process may be stuck, close program to force close the operation.", " "])
 						long_process = true
 					# try uses_piped to avoid this situation
 					# TODO make a better alternative for unpiped threaded executions
@@ -254,18 +312,22 @@ func process(delta: float) -> void:# this can be called externally for threaded 
 						var keys_msg:String = ""
 						for key:String in console_cancel_input_names:
 							keys_msg = str(keys_msg + key + ", ")
-						print_out("Process may be stuck, use " + keys_msg + " or close program to force close the operation.")
+						print_out([" ", "Process may be stuck, use " + keys_msg + " or close program to force close the operation.", " "])
 						long_process = true
 			
 		else: stop_pipe()
 	
-	if not is_piping: finish_execution(["Process terminated.", " "])
+	if not is_piping: 
+		if uses_threads:
+			var output:Array = execution_thread.wait_to_finish()
+			finish_execution(output)
+		else: finish_execution([" ", "Process terminated.", " "])
 	execution_mutex.unlock()
 
 
 func force_stop_pipe() -> void:
 	stop_pipe()
-	if operating or console_processing: finish_execution(["Killed pipe process.", " "])
+	if operating or console_processing: finish_execution([" ", "Killed pipe process.", " "])
 
 func stop_pipe() -> void:
 	execution_mutex.lock()

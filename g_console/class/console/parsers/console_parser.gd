@@ -23,13 +23,21 @@ func _init(_console:Console=null, _name:String="console_parser", _key:Variant=_n
 	console = _console
 
 func parse_text_line(text_line:String) -> Error:
-	if console.operating: 
+	if not console.can_accept_entry: 
 		# here is where we can introduce a "parse line queue"
 		return ERR_BUSY# TODO
 	console.operating = true
 	
-	var err: Error = await _parse_text_line(text_line)
-	warn("_parse_text_line", err)
+	var err: Error = await _default_parsing_order(text_line)
+	
+	return err
+
+func _default_parsing_order(text_line:String) -> Error:
+	var err: Error = OK
+	
+	if console.operating and not did_operate:
+		err = await _parse_text_line(text_line)
+		warn("_parse_text_line", err)
 	
 	if console.operating and not did_operate:
 		err = await default_console_parse(text_line)

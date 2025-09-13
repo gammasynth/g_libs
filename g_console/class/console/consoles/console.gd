@@ -28,10 +28,10 @@ var operating: bool = false:
 	set(b):
 		if b: 
 			can_accept_entry = false
-			operation_started.emit()
+			if not operating: operation_started.emit()
 		else: 
 			can_accept_entry = true
-			operation_finished.emit()
+			if operating: operation_finished.emit()
 		operating = b
 var can_accept_entry:bool=true
 

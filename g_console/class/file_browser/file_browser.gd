@@ -300,11 +300,13 @@ func focus_directory(path:String=current_directory_path) -> Error:
 	directory_focused.emit()
 	return OK
 
+func _directory_change_prevented(at_path:String) -> void: pass
+
 func open_directory(at_path:String=current_directory_path, force:bool=false) -> void: 
 	if at_path == current_directory_path: return
 	if not can_change_directory():
 		if force: pass
-		else: return
+		else: return _directory_change_prevented(at_path)
 	_open_directory(at_path)
 func _open_directory(at_path:String=current_directory_path) -> void: 
 	dir_history.append(at_path)
