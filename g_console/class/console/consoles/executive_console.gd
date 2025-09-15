@@ -330,14 +330,16 @@ func force_stop_pipe() -> void:
 	if operating or console_processing: finish_execution([" ", "Killed pipe process.", " "])
 
 func stop_pipe() -> void:
+	if not uses_piped: return#??
+	if not is_piping: return
 	execution_mutex.lock()
 	pipe_time = 0.0
 	long_process = false
 	if pipe_pid != -1: OS.kill(pipe_pid)
 	pipe_pid = -1
 	
-	if pipe_stdio.is_open(): pipe_stdio.close()
-	if pipe_stderr.is_open(): pipe_stderr.close()
+	if pipe_stdio and pipe_stdio.is_open(): pipe_stdio.close()
+	if pipe_stderr and pipe_stderr.is_open(): pipe_stderr.close()
 	
 	is_piping = false
 	execution_mutex.unlock()

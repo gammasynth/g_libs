@@ -225,6 +225,9 @@ func remove_item(item:FileItem, backup:bool=true, hard:bool=false) -> FileItem:
 # - - -
 
 #region Favoriting Paths
+
+func has_favorite(file_path:String) -> bool: return favorites.values().has(file_path)
+
 func toggle_favorite(file_path:String, toggle:Variant=null) -> void: 
 	if toggle == null:
 		if not remove_favorite(file_path): add_favorite(file_path)
@@ -233,14 +236,14 @@ func toggle_favorite(file_path:String, toggle:Variant=null) -> void:
 		else: remove_favorite(file_path)
 
 func add_favorite(file_path:String) -> bool:
-	if favorites.values().has(file_path): return false
+	if has_favorite(file_path): return false
 	
 	favorites.set(favorites.size(), file_path)
 	favorite_added.emit(file_path)
 	return true
 
 func remove_favorite(file_path:String) -> bool:
-	if not favorites.values().has(file_path): return false
+	if not has_favorite(file_path): return false
 	
 	var favorite_index:int = favorites.values().find(file_path)
 	favorites.erase(favorite_index)
@@ -252,7 +255,7 @@ func remove_favorite(file_path:String) -> bool:
 func go_up_directory() -> void: 
 	if not can_change_directory(): return
 	
-	var current:String = Main.console.current_directory_path
+	var current:String = current_directory_path
 	var next:String = current
 	var base:String = File.ends_with_slash(File.ends_with_slash(next, false).get_base_dir())
 	if not base.is_empty(): next = base
@@ -263,13 +266,20 @@ func go_forward_directory() -> void: travel_timeline(dir_future, dir_history)
 
 func travel_timeline(a:Array[String], b:Array[String]) -> void:
 	if not can_change_directory(): return
-	var current:String = Main.console.current_directory_path
+	var current:String = current_directory_path
 	var next:String = current
+	
 	var this_size:int = a.size()
-	if this_size>0:
+	if this_size>1:
 		b.append(current)
+		
 		next = a.get(this_size-1)
-		a.remove_at(this_size-1)
+		a.resize(this_size-1)
+		this_size = a.size()
+		if next == current:
+			next = a.get(this_size-1)
+			a.resize(this_size-1)
+	
 	if next != current: change_directory(next)
 
 func clear_directory_items() -> void:
@@ -302,15 +312,15 @@ func focus_directory(path:String=current_directory_path) -> Error:
 
 func _directory_change_prevented(at_path:String) -> void: pass
 
-func open_directory(at_path:String=current_directory_path, force:bool=false) -> void: 
+func open_directory(at_path:String=current_directory_path, force:bool=false, focus:bool=true, emit:bool=true) -> void: 
 	if at_path == current_directory_path: return
 	if not can_change_directory():
 		if force: pass
 		else: return _directory_change_prevented(at_path)
-	_open_directory(at_path)
-func _open_directory(at_path:String=current_directory_path) -> void: 
+	_open_directory(at_path, focus, emit)
+func _open_directory(at_path:String=current_directory_path, focus:bool=true, emit:bool=true) -> void: 
 	dir_history.append(at_path)
-	change_directory(at_path)
+	change_directory(at_path, focus, emit)
 
 func change_directory(at_path:String=current_directory_path, focus:bool=true, emit:bool=true) -> void: _change_directory(at_path, focus, emit)
 func _change_directory(at_path:String=current_directory_path, focus:bool=true, emit:bool=true) -> void: 

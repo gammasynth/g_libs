@@ -11,7 +11,7 @@ static func is_user_dir(path:String) -> bool:
 static func begins_with_slash(file_path:String, does:bool=true, backslash:bool=false) -> String:
 	var slash: String = "/"; if backslash: slash = "\\";
 	if does: 
-		if not file_path.begins_with(slash): file_path = str(file_path + slash);
+		if not file_path.begins_with(slash): file_path = str(slash + file_path);
 	else: 
 		var slash_index = file_path.rfind(slash)
 		if slash_index != -1: file_path = file_path.substr(slash_index + 1)

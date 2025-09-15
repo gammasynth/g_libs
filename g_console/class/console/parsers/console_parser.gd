@@ -13,6 +13,11 @@ var did_operate: bool = false:
 			console.operating = false
 
 var console_command_library_names: Dictionary[String, Array]: get = _get_console_command_library_names
+
+var all_commands:Array[ConsoleCommand] = []
+var loaded_commands:bool = false
+var need_reload_commands:bool = false
+
 func _get_console_command_library_names() -> Dictionary[String, Array]:
 	if not console_command_library_names.is_empty(): return console_command_library_names
 	return {"console_commands" : ["commands"]} # String Registry name : Array[String] [RegistryEntry names]
@@ -65,9 +70,21 @@ func default_console_parse(text_line:String) -> Error:
 
 
 func _default_console_parse(text_line:String) -> Error:
-	var operated: bool = false
+	if loaded_commands:
+		if need_reload_commands: load_commands_from_registry()
+	else: load_commands_from_registry()
+	
+	for command:ConsoleCommand in all_commands:
+		var accepted: bool = await command.try_parse_line(text_line)
+		if accepted:
+			did_operate = true
+			break
+	return OK
+
+
+func load_commands_from_registry() -> void:
+	all_commands.clear()
 	for registry_name:String in console_command_library_names:
-		if operated: break
 		
 		var registry: Registry = Registry.get_registry(registry_name)
 		if not registry:
@@ -76,7 +93,6 @@ func _default_console_parse(text_line:String) -> Error:
 		
 		var library_names:Array = console_command_library_names.get(registry_name)
 		for library_name:String in library_names:
-			if operated: break
 			var library:RegistryEntry = registry.grab(library_name)
 			if not library:
 				warn(str("invalid library name, nonexistent RegistryEntry: " + library_name))
@@ -91,15 +107,8 @@ func _default_console_parse(text_line:String) -> Error:
 				if not command or command is not ConsoleCommand:
 					warn("bad command class instance"); continue
 				
-				var accepted: bool = await command.try_parse_line(text_line)
-				if accepted:
-					operated = true
-					break
-		
-	
-	if operated: did_operate = true
-	
-	return OK
+				all_commands.append(command)
+
 
 
 func fallback_console_parse(text_line:String) -> Error:

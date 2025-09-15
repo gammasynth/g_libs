@@ -1,6 +1,7 @@
 class_name Make
 
 
+
 static func child(node:Node, parent:Node, await_ready:bool=true) -> Node:
 	if parent: 
 		parent.add_child(node, true)
@@ -53,13 +54,41 @@ static func text_label(label_text:String, label_name:String="RichTextLabel", par
 	
 	return label
 
-static func fade(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true) -> Tween:
-	if not node or not is_instance_valid(node): push_error("Make.fade(): node is already null or invalid instance!"); return null
+enum FADE_TYPES {OUT, IN, OUT_AND_IN, IN_AND_OUT}
+
+static func fade(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true, type:FADE_TYPES=FADE_TYPES.OUT) -> Tween:
+	match type:
+		FADE_TYPES.OUT:
+			return fade_out(node, duration, disable_controls)
+		FADE_TYPES.IN:
+			return fade_in(node, duration, disable_controls)
+		FADE_TYPES.OUT_AND_IN:
+			var tween:Tween = fade_out(node, duration, disable_controls)
+			tween.tween_callback(
+				fade_in.bind(node, duration, disable_controls)
+				).set_delay(duration)
+		FADE_TYPES.IN_AND_OUT:
+			var tween:Tween = fade_in(node, duration, disable_controls)
+			tween.tween_callback(
+				fade_out.bind(node, duration, disable_controls)
+				).set_delay(duration)
+			return tween
+	return null
+
+static func fade_out(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true) -> Tween:
+	return do_fade(node, Color(0.0, 0.0, 0.0, 0.0), duration, disable_controls)
+
+static func fade_in(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true) -> Tween:
+	return do_fade(node, Color(1.0, 1.0, 1.0, 1.0), duration, disable_controls)
+
+
+static func do_fade(node:CanvasItem, to_color:Color=Color(0.0, 0.0, 0.0, 0.0), duration:float = 1.0, disable_controls:bool=true, trans:Tween.TransitionType=Tween.TRANS_BACK, ease:Tween.EaseType=Tween.EASE_OUT) -> Tween:
+	if not node or not is_instance_valid(node): push_error("Make.fade_out(): node is already null or invalid instance!"); return null
 	
 	if disable_controls: disable_control(node)
 	
 	var tween: Tween = node.create_tween().set_parallel()
-	tween.tween_property(node, "modulate", Color(0.0, 0.0, 0.0, 0.0), duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(node, "modulate", to_color, duration).set_trans(trans).set_ease(ease)
 	return tween
 
 static func fade_delete(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true) -> void:
