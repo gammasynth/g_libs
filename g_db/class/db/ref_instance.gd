@@ -69,7 +69,9 @@ func _get_parent_instance() -> RefInstance: return parent_instance
 
 
 func _init(_name:String="OBJ", _key:Variant=_name) -> void:
-	if origin_instance == null: origin_instance = self; is_origin_instance = true
+	if origin_instance == null: 
+		origin_instance = self
+		is_origin_instance = true
 	
 	name = _name
 	key = _key

@@ -205,7 +205,7 @@ func perform_runnable_execution(order:String) -> int:
 	var args:Array = ["-c", order]
 	# TODO IMPLEMENT OTHER OS TERMINALS
 	if OS.get_name() == "Windows":
-		args = ["/C", str("cd " + current_directory_path + " && " + order)]
+		args = ["/C", str("cd " + current_directory_path + " && " + order)]#
 		new_pid = OS.create_process("CMD.exe", args, true)
 	elif OS.get_name() == "Linux":
 		new_pid = OS.create_process("/bin/sh", args, true)

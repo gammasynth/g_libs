@@ -9,6 +9,9 @@ signal item_deselected(deselected_item:FileItem)
 signal item_entered_cut_state(item:FileItem)
 signal item_exited_cut_state(item:FileItem)
 
+signal items_copied(items:Array[FileItem])
+signal items_cut(items:Array[FileItem])
+
 signal items_pasted(paste_info:Dictionary[String, Variant])
 signal items_deleted(delete_info:Dictionary[String, Variant])
 
@@ -91,6 +94,8 @@ func copy(cut:bool=false) -> void:
 	for item in selected_items: 
 		copied_items.append(item)
 		if cut: start_item_cut(item)
+	if cut: items_cut.emit(copied_items)
+	else: items_copied.emit(copied_items)
 
 func start_item_cut(item:FileItem) -> void:
 	cut_items.append(item)

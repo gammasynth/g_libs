@@ -12,13 +12,6 @@ var canvas_item: CanvasItem:
 
 var position: Vector2i
 
-func _get_key() -> Variant: return position
-func _set_key(_key) -> void: 
-	if _key is Vector2i: 
-		position = _key
-	else: 
-		if _key != null: warn("Non-vector was set as a key!")
-
 var size: Vector2i:
 	get: return chunk_map.chunk_size
 
