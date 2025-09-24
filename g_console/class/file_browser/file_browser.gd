@@ -9,6 +9,8 @@ signal item_deselected(deselected_item:FileItem)
 signal item_entered_cut_state(item:FileItem)
 signal item_exited_cut_state(item:FileItem)
 
+signal items_moved(move_info:Dictionary[String, Variant])
+
 signal items_copied(items:Array[FileItem])
 signal items_cut(items:Array[FileItem])
 
@@ -54,11 +56,27 @@ func deselect_all_items() -> void:
 	for item:FileItem in old_selected_items:
 		deselect_item(item)
 
+func select_items(items:Array[FileItem], _additive:bool=false) -> void:
+	if not _additive: deselect_all_items()
+	for item:FileItem in items:
+		select_item(item, true)
+
 func select_item(item:FileItem, _additive:bool=false) -> void:
 	var additive:bool = _additive; if multi_select: additive = true
-	if not additive: deselect_all_items()
-	if item.is_selected and not additive: deselect_item(item)
-	else: item.is_selected = true
+	
+	if item.is_selected: 
+		if selected_items.size() == 1: deselect_item(item)
+		elif selected_items.size() > 1:
+			if not additive: 
+				deselect_all_items()
+				item.is_selected = true
+			else:
+				deselect_item(item)
+		else: # bug if reach here, assume selected but not in list
+			deselect_item(item)
+	else: 
+		if not additive: deselect_all_items()
+		item.is_selected = true
 	
 	if item.is_selected and not selected_items.has(item): 
 		selected_items.append(item)
@@ -86,7 +104,7 @@ func has_cut_files() -> bool: return cut_items.size() > 0
 
 func copy_item(item:FileItem) -> void: 
 	if item == null or not is_instance_valid(item): return# This should not occur if app is written well.
-	select_item(item)
+	if not item.is_selected: select_item(item)
 	copy()
 
 func copy(cut:bool=false) -> void:
@@ -126,7 +144,7 @@ func clear_cut_set(cut_set:Array[FileItem]=cut_items, deselect_all:bool=true) ->
 
 func cut_item(item:FileItem) -> void: 
 	if item == null or not is_instance_valid(item): return# This should not occur if app is written well.
-	select_item(item)
+	if not item.is_selected: select_item(item)
 	cut()
 
 func cut() -> void:
@@ -162,12 +180,13 @@ func paste_action(path:String, items_to_copy:Array[FileItem], items_to_cut:Array
 	for item:FileItem in items_to_copy:
 		copied_from_items.append(item)
 		var pasted_item:FileItem = paste_item(item, path)
-		pasted_items.append(pasted_item)
-	for item in items_to_cut:
-		var deleted_item:FileItem = remove_item(item)
-		cut_out_items.append(item)
-		temp_deleted_items.append(deleted_item)
-		cut_out_items_info.set(item, deleted_item)
+		if pasted_item: pasted_items.append(pasted_item)
+	if pasted_items.size() > 0:
+		for item in items_to_cut:
+			var deleted_item:FileItem = remove_item(item)
+			cut_out_items.append(item)
+			temp_deleted_items.append(deleted_item)
+			cut_out_items_info.set(item, deleted_item)
 	
 	paste_info.set("pasted_to_path", path)
 	paste_info.set("copied_from_items", copied_from_items)
@@ -181,11 +200,42 @@ func paste_action(path:String, items_to_copy:Array[FileItem], items_to_cut:Array
 
 ## Copies a file to the current_directory_path, returns new FileItem of the pasted file.
 func paste_item(item:FileItem, location:String=current_directory_path) -> FileItem:
+	return move_item(item, location)
+
+func move_items(items_to_move:Array[FileItem], to_path:String) -> void:
+	var move_info:Dictionary[String, Variant] = {}
+	var old_items:Array[FileItem] = items_to_move.duplicate()
+	var old_path:String = current_directory_path
+	if items_to_move.size() > 0:
+		old_path = File.ends_with_slash((items_to_move.get(0) as FileItem).file_path.get_base_dir())
+	var new_path:String = to_path
+	var new_items:Array[FileItem] = []
+	
+	for item:FileItem in old_items:
+		var new_item:FileItem = move_item(item, to_path)
+		if new_item: 
+			remove_item(item, false, true)
+			new_items.append(new_item)
+	
+	move_info.set("old_items", old_items)
+	move_info.set("old_path", old_path)
+	move_info.set("new_path", new_path)
+	move_info.set("new_items", new_items)
+	
+	if new_items.size() > 0: 
+		select_items(new_items)
+		items_moved.emit(move_info)
+
+func move_item(item:FileItem, location:String) -> FileItem:
 	var old_path:String = item.file_path
 	var new_path:String = str(location + item.file_name)
-	var pasted_item:FileItem = FileItem.new(new_path)
+	print("MOVING FILE")
+	print("OLD PATH: " + old_path)
+	print("NEW PATH: " + new_path)
+	if old_path == new_path: return null
+	var moved_item:FileItem = FileItem.new(new_path)
 	DirAccess.copy_absolute(old_path, new_path)
-	return pasted_item
+	return moved_item
 
 func delete_item(item:FileItem) -> void:
 	select_item(item)
@@ -329,6 +379,7 @@ func _open_directory(at_path:String=current_directory_path, focus:bool=true, emi
 
 func change_directory(at_path:String=current_directory_path, focus:bool=true, emit:bool=true) -> void: _change_directory(at_path, focus, emit)
 func _change_directory(at_path:String=current_directory_path, focus:bool=true, emit:bool=true) -> void: 
+	deselect_all_items()
 	current_directory_path = at_path
 	if focus: focus_directory()
 	if emit: directory_focus_changed.emit(at_path)
