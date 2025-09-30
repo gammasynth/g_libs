@@ -8,24 +8,39 @@ static func is_user_dir(path:String) -> bool:
 
 #region Slash Methods
 ## Make a FilePath begin with "/", if it needs to, or remove any path before and containing the first "/", if it has one.
-static func begins_with_slash(file_path:String, does:bool=true, backslash:bool=false) -> String:
-	var slash: String = "/"; if backslash: slash = "\\";
+static func begins_with_slash(file_path:String, does:bool=true, backslash:bool=false, any_slash:bool=true) -> String:
+	var slash: String = "/"
+	var slash2: String = "\\"
+	var other_slash = slash2
+	if backslash: 
+		other_slash = slash
+		slash = slash2
 	if does: 
 		if not file_path.begins_with(slash): file_path = str(slash + file_path);
 	else: 
 		var slash_index = file_path.rfind(slash)
 		if slash_index != -1: file_path = file_path.substr(slash_index + 1)
+		elif any_slash: 
+			slash_index = file_path.rfind(other_slash)
+			if slash_index != -1: file_path = file_path.substr(slash_index + 1)
 	return file_path
 
 ## Make a FilePath end with a "/", if it needs to, or remove a "/" from the end of the FilePath.
-static func ends_with_slash(file_path:String, does:bool=true, backslash:bool=false) -> String:
-	var slash: String = "/"; if backslash: slash = "\\";
+static func ends_with_slash(file_path:String, does:bool=true, backslash:bool=false, any_slash:bool=true) -> String:
+	var slash: String = "/"
+	var slash2: String = "\\"
+	var other_slash = slash2
+	if backslash: 
+		other_slash = slash
+		slash = slash2
 	if does:
 		if not file_path.ends_with(slash): 
 			file_path = str(file_path + slash);
 	else: 
 		if file_path.right(1) == slash: 
-			file_path = file_path.substr(0, file_path.length() - 1);
+			file_path = file_path.substr(0, file_path.length() - 1)
+		if any_slash and file_path.right(1) == other_slash:
+			file_path = file_path.substr(0, file_path.length() - 1)
 	return file_path
 
 static func no_slashes(file_path:String) -> String: return begins_with_slash(ends_with_slash(file_path, false), false)

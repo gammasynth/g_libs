@@ -10,4 +10,5 @@ func _boot_registry():
 		
 	]
 	check_folder_for_folder("res://", "commands", (func(n): directories_to_load.append(n)), true)
+	check_folder_for_folder("user://", "commands", (func(n): directories_to_load.append(n)), true)
 	return OK

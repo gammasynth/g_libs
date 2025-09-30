@@ -131,6 +131,9 @@ func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok
 	if return_ok: return OK
 	return null
 
+## [chatf] will force a [chat] without needing to send a true boolean.
+func chatf(text:String, clr:Variant=-1) -> Variant: return chat(text, clr, true)
+
 ## [chatd] will force a [chat] during [deep_debug].
 func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: 
 	if deep_debug: return chat(text, clr, deep_debug, return_ok)

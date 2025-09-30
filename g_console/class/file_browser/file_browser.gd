@@ -17,6 +17,9 @@ signal items_cut(items:Array[FileItem])
 signal items_pasted(paste_info:Dictionary[String, Variant])
 signal items_deleted(delete_info:Dictionary[String, Variant])
 
+signal overwrite_query_request(file_path:String, is_folder:bool)
+signal overwrite_query_handled()
+
 signal favorite_added(file_path:String)
 signal favorite_removed(file_path:String)
 
@@ -39,6 +42,10 @@ var copied_items: Array[FileItem] = []
 var cut_items: Array[FileItem] = []
 
 var favorites:Dictionary = {}# order int : path String
+
+var query_overwrites:bool=false
+var overwrite_query_wait:bool=false
+var overwrite_query_value:bool=false
 
 # - - -
 #region Selecting Items
@@ -164,7 +171,7 @@ func cut() -> void:
 ## "cut_out_items_info" : Dictionary[FileItem, FileItem] to access the FileItem in temp_deleted_items as values, with the FileItems in cut_out_items acting as keys.
 func paste(path:String=current_directory_path) -> Dictionary[String, Variant]:
 	deselect_all_items()
-	var paste_info:Dictionary[String, Variant] = paste_action(path, copied_items, cut_items)
+	var paste_info:Dictionary[String, Variant] = await paste_action(path, copied_items, cut_items)
 	clear_cuts_and_copies()
 	return paste_info
 
@@ -179,7 +186,7 @@ func paste_action(path:String, items_to_copy:Array[FileItem], items_to_cut:Array
 	
 	for item:FileItem in items_to_copy:
 		copied_from_items.append(item)
-		var pasted_item:FileItem = paste_item(item, path)
+		var pasted_item:FileItem = await paste_item(item, path)
 		if pasted_item: pasted_items.append(pasted_item)
 	if pasted_items.size() > 0:
 		for item in items_to_cut:
@@ -200,7 +207,7 @@ func paste_action(path:String, items_to_copy:Array[FileItem], items_to_cut:Array
 
 ## Copies a file to the current_directory_path, returns new FileItem of the pasted file.
 func paste_item(item:FileItem, location:String=current_directory_path) -> FileItem:
-	return move_item(item, location)
+	return await move_item(item, location)
 
 func move_items(items_to_move:Array[FileItem], to_path:String) -> void:
 	var move_info:Dictionary[String, Variant] = {}
@@ -212,9 +219,9 @@ func move_items(items_to_move:Array[FileItem], to_path:String) -> void:
 	var new_items:Array[FileItem] = []
 	
 	for item:FileItem in old_items:
-		var new_item:FileItem = move_item(item, to_path)
+		var new_item:FileItem = await move_item(item, to_path)
 		if new_item: 
-			remove_item(item, false, true)
+			remove_item(item, false, false)
 			new_items.append(new_item)
 	
 	move_info.set("old_items", old_items)
@@ -226,13 +233,54 @@ func move_items(items_to_move:Array[FileItem], to_path:String) -> void:
 		select_items(new_items)
 		items_moved.emit(move_info)
 
+func move_directory(item:FileItem, location:String) -> FileItem:
+	var old_path:String = item.file_path
+	if not DirAccess.dir_exists_absolute(old_path): return null
+	var new_path:String = File.ends_with_slash(str(location + item.file_name))
+	chatf("MOVING FOLDER")
+	chatf("OLD PATH: " + old_path)
+	chatf("NEW PATH: " + new_path)
+	if old_path == new_path: return null
+	
+	if query_overwrites and DirAccess.dir_exists_absolute(new_path):
+		overwrite_query_wait = true
+		overwrite_query_value = false
+		overwrite_query_request.emit(new_path, true)
+		if overwrite_query_wait: await overwrite_query_handled
+		if not overwrite_query_value: return null# the query was denied
+	
+	var moved_item:FileItem = FileItem.new(new_path)
+	DirAccess.make_dir_absolute(new_path)
+	
+	var all_paths:Array[String] = get_all_paths_in_directory(old_path)
+	for p:String in all_paths:
+		var subitem:FileItem = FileItem.new(p)
+		if DirAccess.dir_exists_absolute(p):
+			move_directory(subitem, new_path)
+		elif FileAccess.file_exists(p):
+			move_item(subitem, new_path)
+	
+	return moved_item
+
 func move_item(item:FileItem, location:String) -> FileItem:
 	var old_path:String = item.file_path
+	
+	if not FileAccess.file_exists(old_path) and DirAccess.dir_exists_absolute(old_path): 
+		return await move_directory(item, location)
+	
 	var new_path:String = str(location + item.file_name)
-	print("MOVING FILE")
-	print("OLD PATH: " + old_path)
-	print("NEW PATH: " + new_path)
+	chatf("MOVING FILE")
+	chatf("OLD PATH: " + old_path)
+	chatf("NEW PATH: " + new_path)
 	if old_path == new_path: return null
+	
+	if query_overwrites and FileAccess.file_exists(new_path):
+		overwrite_query_wait = true
+		overwrite_query_value = false
+		overwrite_query_request.emit(new_path, false)
+		if overwrite_query_wait: await overwrite_query_handled
+		if not overwrite_query_value: return null# the query was denied
+	
 	var moved_item:FileItem = FileItem.new(new_path)
 	DirAccess.copy_absolute(old_path, new_path)
 	return moved_item
@@ -272,7 +320,7 @@ func remove_item(item:FileItem, backup:bool=true, hard:bool=false) -> FileItem:
 		var new_path :String = str("user://temp/deleted/" + item.file_name)
 		deleted_item = FileItem.new(new_path)
 		DirAccess.copy_absolute(item_path, new_path)
-	if hard: DirAccess.remove_absolute(item_path)# WARN
+	if hard: DirAccess.remove_absolute(item_path)# WARN # if this item is directory and not empty, it wont delete!
 	else: OS.move_to_trash(item_path)
 	return deleted_item
 #endregion
@@ -349,6 +397,15 @@ func add_directory_item(file_path:String) -> void:
 
 func focus_directory(path:String=current_directory_path) -> Error:
 	clear_directory_items()
+	var all_paths: Array[String] = get_all_paths_in_directory(path)
+	
+	for p in all_paths:
+		add_directory_item(p)
+	
+	directory_focused.emit()
+	return OK
+
+func get_all_paths_in_directory(path:String) -> Array[String]:
 	var all_paths: Array[String] = []
 	
 	var folder_paths = DirAccess.get_directories_at(path)
@@ -359,11 +416,7 @@ func focus_directory(path:String=current_directory_path) -> Error:
 	for p in file_paths: 
 		all_paths.append(path + p)
 	
-	for p in all_paths:
-		add_directory_item(p)
-	
-	directory_focused.emit()
-	return OK
+	return all_paths
 
 func _directory_change_prevented(at_path:String) -> void: pass
 

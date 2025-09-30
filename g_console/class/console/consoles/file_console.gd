@@ -21,10 +21,12 @@ func _open_directory(at_path:String=current_directory_path, print_dir:bool=false
 
 func change_directory(at_path:String=current_directory_path, print_dir:bool=false, emit:bool=true) -> void: _change_directory(at_path, print_dir, emit)
 func _change_directory(at_path:String=current_directory_path, print_dir:bool=false, emit:bool=true) -> void: 
-	current_directory_path = at_path
+	
+	current_directory_path = File.ends_with_slash(at_path)
+	current_directory_path = current_directory_path.replace("\\", "/")
 	
 	if print_dir: print_out("cd " + at_path)
-	if emit: directory_focus_changed.emit(at_path)
+	if emit: directory_focus_changed.emit(current_directory_path)
 
 func can_change_directory() -> bool: return _can_change_directory()
 func _can_change_directory() -> bool: return true
