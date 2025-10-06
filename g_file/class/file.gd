@@ -17,15 +17,15 @@ static func get_folder(path:String, full_path:bool=false) -> String: return Fold
 
 #region Directory Elements Methods
 ## Scan a Directory for Directories, return an Array[String] each Directory's path (or full_path)
-static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false) -> Array[String]: return FolderUtil.get_all_directories_from_directory(folder_path, full_path, recursive)
+static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false, blacklist_folder_names:Array[String]=[]) -> Array[String]: return FolderUtil.get_all_directories_from_directory(folder_path, full_path, recursive, blacklist_folder_names)
 
 ## Scan a Directory for files, return an Array of each file's path (or full_path)
 ## A whitelist can be used to only collect files of certain extensions
-static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false) -> Array[String]: return FolderUtil.get_all_filepaths_from_directory(file_path, whitelist_extension, full_path)
+static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array[String]=[]) -> Array[String]: return FolderUtil.get_all_filepaths_from_directory(file_path, whitelist_extension, full_path, blacklist_file_names)
 
 ## Return all FilePaths within a Folder and within every Subfolder, Recursively.
 ## @experimental: useful?
-static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, inlcude_hidden:bool=false) -> Variant: return FolderUtil.search_for_file_paths_recursively(folder_path, as_dictionary, extra_folder, inlcude_hidden)
+static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, inlcude_hidden:bool=false, blacklist_folder_names:Array[String]=[], blacklist_file_names:Array[String]=[]) -> Variant: return FolderUtil.search_for_file_paths_recursively(folder_path, as_dictionary, extra_folder, inlcude_hidden, blacklist_folder_names, blacklist_file_names)
 #endregion
 
 #endregion

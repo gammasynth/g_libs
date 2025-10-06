@@ -8,6 +8,12 @@ class_name ScriptTool
 @export var filename_begins_with: String = "database_"
 @export var filename_ends_with: String = ".gd"
 
+@export var comment_character: String = "#"
+
+@export var blacklist_folder_names: Array[String] = []
+@export var blacklist_file_names: Array[String] = []
+@export var include_hidden_folders: bool = true
+
 @export var control_script_path: String = "res://lib/g_libs/g_db/class/node/database_node.gd"
 
 @export var update_scripts_to_control_script: bool = false:
@@ -43,9 +49,9 @@ func do_update_scripts_to_control_script():
 	var file_paths : Array = []
 	
 	if search_recursive:
-		file_paths = FileTool.search_for_file_paths_recursively(search_path)
+		file_paths = FileTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
 	else:
-		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true)
+		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
 	
 	#print("ScriptTool | files: " + str(file_paths) )
 	
@@ -116,9 +122,9 @@ func do_update_files_licensing():
 	var file_paths : Array = []
 	
 	if search_recursive:
-		file_paths = FileTool.search_for_file_paths_recursively(search_path)
+		file_paths = FileTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
 	else:
-		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true)
+		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
 	
 	#print("ScriptTool | files: " + str(file_paths) )
 	
@@ -148,10 +154,12 @@ func do_update_files_licensing():
 	else:
 		license_text = ""
 	
-	var main_license_bracket:String = "#|*******************************************************************"
-	var license_bracket:String = "#*******************************************************************"
+	var license_bracket:String = "*******************************************************************"
+	var main_license_bracket:String = str("|" + license_bracket)
+	main_license_bracket = str(comment_character + main_license_bracket)
+	license_bracket = str(comment_character + license_bracket)
 	var is_licensed_print: String = "licensed"
-	if license_files: is_licensed_print = "unlicensed"
+	if not license_files: is_licensed_print = "unlicensed"
 	
 	var full_licensing:String = str(license_text + "\n" + main_license_bracket)
 	if header_licensed_files: full_licensing = str(licensed_file_header + "\n" + license_bracket + "\n" + full_licensing)
@@ -161,6 +169,14 @@ func do_update_files_licensing():
 		var this_licensing : String = full_licensing
 		if name_licensed_files: this_licensing = str(file_name + "\n" + license_bracket + this_licensing)
 		this_licensing = str(main_license_bracket + "\n" + this_licensing)
+		var this_licensing_lines:PackedStringArray = this_licensing.split("\n", true, 0)
+		this_licensing = ""
+		for line:String in this_licensing_lines:
+			var this_line:String = line
+			if not this_line.begins_with(comment_character): 
+				this_line = str(comment_character + " " + this_line)
+			this_line = str(this_line + "\n")
+			this_licensing = str(this_licensing + this_line)
 		
 		var file: FileAccess = FileAccess.open(path, FileAccess.READ_WRITE)
 		if not file:

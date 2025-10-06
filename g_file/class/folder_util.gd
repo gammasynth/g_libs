@@ -26,7 +26,7 @@ static func get_folder(path:String, full_path:bool=false) -> String:
 
 #region Directory Elements Methods
 ## Scan a Directory for Directories, return an Array[String] each Directory's path (or full_path)
-static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false) -> Array[String]:
+static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false, blacklist_folder_names:Array[String]=[]) -> Array[String]:
 	var filepaths: Array[String] = []
 	
 	folder_path = FileUtil.ends_with_slash(folder_path)
@@ -37,6 +37,7 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
+		if blacklist_folder_names.has(file_name): continue
 		if dir.current_is_dir():
 			# if current Directory in list is valid and not a File, collect Directory path for list
 			var fp: String = FileUtil.ends_with_slash(str(folder_path + file_name))
@@ -54,31 +55,33 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 
 ## Scan a Directory for files, return an Array of each file's path (or full_path)
 ## A whitelist can be used to only collect files of certain extensions
-static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false) -> Array[String]:
+static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array[String]=[]) -> Array[String]:
 	var filepaths: Array[String] = []
 	var dir = DirAccess.open(file_path); if not dir: return [];
 	# Use DirAccess to list through the Directory's contents as FileName Strings
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
+		if blacklist_file_names.has(file_name): continue
 		if not dir.current_is_dir(): 
 			var allowed_file = true
+			var fp:String = str(file_path + file_name)
+			if blacklist_file_names.has(fp): continue
+			var ext: String = file_name.get_extension()
+			if blacklist_file_names.has(fp.substr(0, fp.find(ext))): continue
+			if blacklist_file_names.has(file_name.substr(0, file_name.find(ext))): continue
 			# if current File in list is valid and not a SubDirectory, collect filepath for list
-			if not whitelist_extension.is_empty():
-				var file_extension = file_name.get_extension()
-				if file_extension != whitelist_extension:
-					allowed_file = false
-			if full_path:
-				file_name = str(file_path + file_name)
-			if allowed_file:
-				filepaths.append(file_name)
+			if not whitelist_extension.is_empty() and ext != whitelist_extension: allowed_file = false
+			if allowed_file: 
+				if full_path: filepaths.append(fp)
+				else: filepaths.append(file_name)
 		file_name = dir.get_next()
 	# Return the Array list of FilePath Strings
 	return filepaths
 
 ## Return all FilePaths within a Folder and within every Subfolder, Recursively.
 ## @experimental: useful?
-static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, inlcude_hidden:bool=false) -> Variant:#, is_absolute_path:bool=false) -> Dictionary:
+static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, include_hidden:bool=false, blacklist_folder_names:Array[String]=[], blacklist_file_names:Array[String]=[]) -> Variant:#, is_absolute_path:bool=false) -> Dictionary:
 	var this_directory_dict: Dictionary = {}
 	var this_directory_folder_dict: Dictionary = {}
 	var this_directory_file_dict: Dictionary = {}
@@ -86,27 +89,29 @@ static func search_for_file_paths_recursively(folder_path:String, as_dictionary:
 	var all_file_paths: Array[String] = []
 	var all_file_names: Array[String] = []
 	
-	var subfolder_full_paths: Array[String] = get_all_directories_from_directory(folder_path, true)
-	var subfolder_paths: Array[String] = get_all_directories_from_directory(folder_path)
+	var subfolder_full_paths: Array[String] = get_all_directories_from_directory(folder_path, true, false, blacklist_folder_names)
+	var subfolder_paths: Array[String] = get_all_directories_from_directory(folder_path, false, false, blacklist_folder_names)
 	
 	for subfolder_path in subfolder_paths:
+		if blacklist_folder_names.has(subfolder_path): continue
 		var subfolder_allowed = true
 		var subfolder_hidden = false
 		if subfolder_path.find(".") != -1:
-			subfolder_hidden = true
-		if inlcude_hidden == false:
+			subfolder_hidden = true# TODO having a period at beginning may deem hidden, but not period anywhere
+		if include_hidden == false:
 			if subfolder_hidden == true:
 				subfolder_allowed = false
 		if subfolder_allowed:
 			var subfolder_directory
 			var subfolder_full_path: String = str(subfolder_full_paths[subfolder_paths.find(subfolder_path)] + "/")
-			subfolder_directory = search_for_file_paths_recursively(subfolder_full_path, as_dictionary, false)
+			subfolder_directory = search_for_file_paths_recursively(subfolder_full_path, as_dictionary, false, include_hidden, blacklist_folder_names, blacklist_file_names)
 			if as_dictionary: this_directory_folder_dict[subfolder_full_path] = subfolder_directory
 			else:
 				all_file_paths.append_array(subfolder_directory)
 				all_file_names.append_array(FileUtil.get_file_names_from_file_paths(subfolder_directory))
 	
-	all_file_paths.append_array(get_all_filepaths_from_directory(folder_path, "", true))
+	
+	all_file_paths.append_array(get_all_filepaths_from_directory(folder_path, "", true, blacklist_file_names))
 	all_file_names.append_array(FileUtil.get_file_names_from_file_paths(all_file_paths))
 	
 	for fp in all_file_paths:
