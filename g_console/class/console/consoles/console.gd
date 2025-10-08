@@ -1,3 +1,23 @@
+#|*******************************************************************
+# console.gd
+#*******************************************************************
+# This file is part of g_libs. 
+# g_libs is an open-source software codebase.
+# g_libs is licensed under the MIT license.
+#*******************************************************************
+# Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
+# Gammasynth (Gammasynth Software), Texas, U.S.A.
+# 
+# This software is licensed under the MIT license.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# 
+#|*******************************************************************
+
 extends Database
 ## The Console was made for the OmniConsole extension of it. See https://gammasynth.com/omni
 ## A console can optionally use a line_edit as a GUI input, and optionally use a text_edit or rich_label as a GUI output.
@@ -42,7 +62,33 @@ var last_print:String = ""
 
 # TODO
 var command_history:Array[String] = []
-var command_history_index:int = 0
+var command_history_index:int = -1
+
+enum CONSOLE_HISTORY_TRAVEL_TYPES {NONE, BACKWARD, FORWARD, EARLIEST, LATEST}
+
+func travel_console_history(travel_type:CONSOLE_HISTORY_TRAVEL_TYPES=CONSOLE_HISTORY_TRAVEL_TYPES.NONE) -> String:
+	if command_history_index == -1: command_history_index = command_history.size()
+	var next_line:String = ""
+	if command_history.size() == 0: return next_line
+	match travel_type:
+		CONSOLE_HISTORY_TRAVEL_TYPES.BACKWARD:
+			command_history_index -= 1
+			if command_history_index < 0:
+				command_history_index = 0
+			next_line = command_history.get(command_history_index)
+		CONSOLE_HISTORY_TRAVEL_TYPES.FORWARD:
+			command_history_index += 1
+			if command_history_index > command_history.size() - 1:
+				command_history_index = command_history.size() - 1
+			next_line = command_history.get(command_history_index)
+		CONSOLE_HISTORY_TRAVEL_TYPES.EARLIEST: 
+			command_history_index = 0
+			next_line = command_history.get(command_history_index)
+		CONSOLE_HISTORY_TRAVEL_TYPES.LATEST: 
+			command_history_index = command_history.size() - 1
+			next_line = command_history.get(command_history_index)
+			command_history_index = -1
+	return next_line
 
 func _parsing_overflow() -> void: print_out("Busy! Please wait...")
 
@@ -50,7 +96,9 @@ func parse_text_line(text_line:String, force:bool=false) -> Error:
 	if not can_accept_entry and not force:
 		_parsing_overflow()
 		return ERR_BUSY
-	command_history.append(text_line)
+	if not command_history.has(text_line):
+		command_history.append(text_line)
+		command_history_index = -1
 	return await parser.parse_text_line(text_line)
 
 func print_out(printable:Variant) -> void:

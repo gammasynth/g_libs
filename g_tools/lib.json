@@ -12,8 +12,8 @@
 
 			"owner" : "Gammasynth",
 			"website" : "https://gammasynth.com",
-			"copyright" : "Copyright Gammasynth 2025",
-			"license" : "All rights reserved",
+			"copyright" : "Copyright (c) Gammasynth 2025 AD / 1447 AH",
+			"license" : "MIT",
 
 			"is_sublibrary" : true,
 			"useable_zipped" : false,
