@@ -20,35 +20,47 @@
 
 extends RefCounted
 
-## RefInstance is a debuggable, nameable, keyable RefCounted Object, with the ability to chat/warn/check and start and tick.
+## RefInstance is a debuggable, nameable, keyable, and operatable RefCounted Object, with the ability to [method chat]/[method RefInstance.warn]/[method RefInstance.check] and [method RefInstance.start] and [method RefInstance.tick].
 ##
 ## RefInstance can keep a reference to a [parent_instance] that owns this instance, if there is one.[br]
 ## [br]
-## [chat] can be used to print messages by force or only if [debug], [warn] and [check] is useful for error debugging.
+## The [method RefInstance.chat] method can be used to print messages by force or only if [member RefInstance.debug] is true, the [method RefInstance.warn] and [method RefInstance.check] methods are useful for error debugging and catching.
 ## [br]
-## Functional processes can be inserted in overridden tick functions, helping with order systems.
+## Functional processes can be inserted in overridden tick operation functions, by overriding any of the operation methods ( [method RefInstance._start], [method RefInstance._tick_started], [method RefInstance._tick], [method RefInstance._finish_tick] ) in an extended class, helping with organized operation order systems.
+##[br]
+## [RefInstance] is primarily intended to be a foundational base class for the [Database] class to be built upon, and the [RefCounted] class is faster to initialize and reccommend over this class in most cases.
 class_name RefInstance
 
 #region Instance Properties
 
+## The first RefInstance instance to be initialized in a runtime will be declared the static origin_instance.
 static var origin_instance: RefInstance = null
+## The first RefInstance instance to be initialized will enable this for itself, and all other instances will have this disabled.
 var is_origin_instance: bool = false
 
+## The signal [signal RefInstance.started] is emitted when the method [method RefInstance.start] is called, prior to the execution of an overridden[method RefInstance._start] method.
 signal started
 
+## The signal [signal RefInstance.starting_tick] is emitted every time the method [method RefInstance.tick] is executed, by default, if the method [method RefInstance._start] is not overriden, the [method RefInstance.tick] method will be called upon executing the [method RefInstance.start] method.
 signal starting_tick
+
+## The signal [signal RefInstance.finished_tick] is emitted every time the method [method RefInstance.tick] is executed and about to finish execution, by default, and it emits after the [method RefInstance._finish_tick] method is executed and completed.
 signal finished_tick
 
 
 #region Debug
-signal debug_toggled(b:bool)
-
+## The static member [member RefInstance.debug_all] is used as a global toggle for a state of debug, which takes precedence above whatever toggle state an instance's [member RefInstance.debug] may be.
 static var debug_all: bool = false
+## The static member [member RefInstance.deep_debug_all] is used as a global toggle for a state of deep_debug, which takes precedence above whatever toggle state an instance's [member RefInstance.deep_debug] may be.
 static var deep_debug_all: bool = false
 
+## The static member [member RefInstance.allow_chat] is used as a global enabler for the ability for [method RefInstance.chat] calls to actually print to the primary output and log, and does not affect [method RefInstance.chat] having the capacity to output/call to an assigned [member RefInstance.chat_mirror_callable].
 static var allow_chat:bool = true
+## The static member [member RefInstance.chat_mirror_callable] is not used by default and is null or empty, the type is Variant to allow the value to be null, but if a [Callable] is assigned, then every [method RefInstance.chat] call will call this callable and will pass the chat to this callable. [br]The overriding
 static var chat_mirror_callable:Variant = null
 
+## The signal [signal RefInstance.debug_toggled] is emitted with the current new debug boolean state every time the member [member RefInstance.debug] is changed/toggled.
+signal debug_toggled(b:bool)
 @export var debug:bool=false: get = get_debug, set = set_debug
 func get_debug() -> bool: return debug or debug_all;
 func set_debug(_debug:bool) -> void: debug_toggled.emit(_debug); debug = _debug; if origin_instance == self: debug_all = debug;
