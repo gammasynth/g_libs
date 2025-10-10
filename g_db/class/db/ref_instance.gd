@@ -20,63 +20,74 @@
 
 extends RefCounted
 
-## RefInstance is a debuggable, nameable, keyable, and operatable RefCounted Object, with the ability to [method chat]/[method RefInstance.warn]/[method RefInstance.check] and [method RefInstance.start] and [method RefInstance.tick].
+## [class RefInstance] is a debuggable, nameable, keyable, and operatable [class RefCounted] Object, with the ability to [method chat]/[method warn]/[method check] for logging/text-output, and [method start] and [method tick] for ordered operations.
 ##
-## RefInstance can keep a reference to a [parent_instance] that owns this instance, if there is one.[br]
+## [class RefInstance] can keep a reference to a [member parent_instance] that owns this instance, if there is one. Ownership of an instance can be an arbitrary scheme by the developer using the [class RefInstance], or it will be used to reference a parent [class Database] in the case that the instance is within a [class Database]'s [member Database.data].[br]
 ## [br]
-## The [method RefInstance.chat] method can be used to print messages by force or only if [member RefInstance.debug] is true, the [method RefInstance.warn] and [method RefInstance.check] methods are useful for error debugging and catching.
+## The [method chat] method can be used to print messages by force, or only if [member debug] is true, the [method warn] and [method check] methods are useful for error debugging and catching, and can be used as conditional breakpoints.
 ## [br]
-## Functional processes can be inserted in overridden tick operation functions, by overriding any of the operation methods ( [method RefInstance._start], [method RefInstance._tick_started], [method RefInstance._tick], [method RefInstance._finish_tick] ) in an extended class, helping with organized operation order systems.
+## Functional processes can be inserted in overridden tick operation functions, by overriding any of the operation methods ([method _start], [method _tick_started], [method _tick], [method _finish_tick]) in an extended class, helping with organized operation order systems.
 ##[br]
-## [RefInstance] is primarily intended to be a foundational base class for the [Database] class to be built upon, and the [RefCounted] class is faster to initialize and reccommend over this class in most cases.
+## [class RefInstance] is primarily intended to be a foundational base class for the [class Database] class to be built upon, and the [class RefCounted] class is faster to initialize and is reccommend over this class in most cases.
 class_name RefInstance
 
 #region Instance Properties
 
-## The first RefInstance instance to be initialized in a runtime will be declared the static origin_instance.
+## The first [class RefInstance] instance to be initialized in a runtime will be declared the static [member origin_instance].
 static var origin_instance: RefInstance = null
-## The first RefInstance instance to be initialized will enable this for itself, and all other instances will have this disabled.
+## The first [class RefInstance] instance to be initialized in a runtime becomes the [member origin_instance] and will enable this boolean for itself, and all other instances will have this boolean disabled.
 var is_origin_instance: bool = false
 
-## The signal [signal RefInstance.started] is emitted when the method [method RefInstance.start] is called, prior to the execution of an overridden[method RefInstance._start] method.
+## The signal [signal started] is emitted when the method [method start] is called, it is emitted prior to the execution of an overridden [method _start] method.
 signal started
 
-## The signal [signal RefInstance.starting_tick] is emitted every time the method [method RefInstance.tick] is executed, by default, if the method [method RefInstance._start] is not overriden, the [method RefInstance.tick] method will be called upon executing the [method RefInstance.start] method.
+## The signal [signal starting_tick] is emitted every time the method [method tick] is executed, before the rest of the method. By default, if the method [method _start] is not overriden, the [method tick] method will be called upon executing the [method start] method.
 signal starting_tick
 
-## The signal [signal RefInstance.finished_tick] is emitted every time the method [method RefInstance.tick] is executed and about to finish execution, by default, and it emits after the [method RefInstance._finish_tick] method is executed and completed.
+## The signal [signal finished_tick] is emitted every time the method [method tick] is executed and about to finish execution, and it emits after the [method _finish_tick] method has been executed and completed.
 signal finished_tick
 
 
 #region Debug
-## The static member [member RefInstance.debug_all] is used as a global toggle for a state of debug, which takes precedence above whatever toggle state an instance's [member RefInstance.debug] may be.
+## The static member [member debug_all] is used as a global toggle for a state of debug, which takes precedence above whatever toggle state an instance's [member debug] may be at any time.
 static var debug_all: bool = false
-## The static member [member RefInstance.deep_debug_all] is used as a global toggle for a state of deep_debug, which takes precedence above whatever toggle state an instance's [member RefInstance.deep_debug] may be.
+## The static member [member deep_debug_all] is used as a global toggle for a state of deep debug, which takes precedence above whatever toggle state an instance's [member deep_debug] may be at any time.
 static var deep_debug_all: bool = false
 
-## The static member [member RefInstance.allow_chat] is used as a global enabler for the ability for [method RefInstance.chat] calls to actually print to the primary output and log, and does not affect [method RefInstance.chat] having the capacity to output/call to an assigned [member RefInstance.chat_mirror_callable].
+## The static member [member allow_chat] is used as a global enabler/disabler for the ability for [method chat] calls to actually print to the primary output and log, and does not affect [method chat] having the capacity to output/call to an assigned [member chat_mirror_callable].
 static var allow_chat:bool = true
-## The static member [member RefInstance.chat_mirror_callable] is not used by default and is null or empty, the type is Variant to allow the value to be null, but if a [Callable] is assigned, then every [method RefInstance.chat] call will call this callable and will pass the chat to this callable. [br]The overriding
+## The static member [member chat_mirror_callable] is not used by default and is null or empty, the type is [class Variant] to allow the value to be null, but if a [class Callable] is assigned, then every [method chat] call will call this callable and will pass the chat to this callable.
 static var chat_mirror_callable:Variant = null
 
-## The signal [signal RefInstance.debug_toggled] is emitted with the current new debug boolean state every time the member [member RefInstance.debug] is changed/toggled.
+## The signal [signal debug_toggled] is emitted with the current new debug boolean state every time the member [member debug] is changed/toggled.
 signal debug_toggled(b:bool)
+## The member [member debug] is used to toggle the current state of debug, for some systems it may be preferrable to initialize an application with debug enabled prior to runtime initialization, rather than enabling it during the runtime.
 @export var debug:bool=false: get = get_debug, set = set_debug
+## The getting of member [member debug] is overidden via method [method get_debug] to return [member debug] or [member debug_all] in the case where one or both may be true.
 func get_debug() -> bool: return debug or debug_all;
+## The setting of member [member debug] is overidden via method [method set_debug] so that [signal debug_toggled] can emit upon the change. If member [member debug] is changed on the [member origin_instance], then the change to its [member debug] is also applied to [member debug_all].
 func set_debug(_debug:bool) -> void: debug_toggled.emit(_debug); debug = _debug; if origin_instance == self: debug_all = debug;
 
+## The signal [signal deep_debug_toggled] is emitted with the current new deep debug boolean state every time the member [member deep_debug] is changed/toggled.
 signal deep_debug_toggled(b:bool)
+## The member [member deep_debug] is used to toggle the current state of deep debug, for some systems it may be preferrable to initialize an application with deep debug enabled prior to runtime initialization, rather than enabling it during the runtime.
 @export var deep_debug:bool=false: get = get_deep_debug, set = set_deep_debug
+## The getting of member [member deep_debug] is overidden via method [method get_deep_debug] to return [member deep_debug] or [member deep_debug_all] in the case where one or both may be true.
 func get_deep_debug() -> bool: return deep_debug or deep_debug_all;
+## The setting of member [member deep_debug] is overidden via method [method set_deep_debug] so that [signal deep_debug_toggled] can emit upon the change. If member [member deep_debug] is changed on the [member origin_instance], then the change to its [member deep_debug] is also applied to [member deep_debug_all].
 func set_deep_debug(_deep_debug:bool) -> void: deep_debug_toggled.emit(_deep_debug); deep_debug = _deep_debug; if origin_instance == self: deep_debug_all = deep_debug
 #endregion
 
 #region Instance Name
+## The signal [signal name_changed] is emitted any time that the member [member name] is set/changed.
 signal name_changed(new_name: String, old_name: String)
 
+## The member [member name] can be used as a [class String] object identifier, whether generic per classtype or unique per instance.
 var name : String = "OBJ": set = set_name
+## The setting of member [member name] is overriden via method [method set_name], so that the signal [signal name_changed] can be emitted with both the new and the previous names.
 func set_name(_name) -> void: var old = name; name = _name; name_changed.emit(_name, old)
 
+## A [member persona] is not a [member name]. If an instance has a [member persona] assigned (it is an empty [class String] by default), then the [method chat] will use the [member persona] to identify itself in its chats rather than using its [member name]. An empty [class String] can be assigned to be used as a [member persona] as well.
 var persona: String:
 	get:
 		if has_persona: return persona
@@ -84,15 +95,21 @@ var persona: String:
 	set(s):
 		has_persona = true
 		persona = s
+## The member [member has_persona] is set to true whenever a [member persona] is applied, and this is the member that [method chat] uses to check for the use of a persona. The member [member has_persona] does not disable itself after being enabled on an instance, but it can be manually disabled after enabled.
 var has_persona: bool = false
 #endregion
 
 #region Instance Key
+## A [member key] is a [class Variant] object identifier, and without changing the instance constructor behavior or manually assigning a [member key] value, the key will default to being the same as the [class String] [member name] value.
 @export var key: Variant = null: get = _get_key, set = _set_key
+## The getting of member [member key] is overidden via the method [method _get_key], and simply returns the member [member key] by default. This method [method _get_key] can be overidden in an extended class to add additional behaviors.
 func _get_key() -> Variant: return key
-func _set_key(_key) -> void: key = _key; if _key is String or str(_key) is String and str(_key).length() > 0: name = _key
+## The setting of member [member key] is overidden via the method [method _set_key], and simply sets the member [member key] by default and also attempts to apply the new [member key] to the member [member name] if the new key value is a [class String] or if the new key value is able to be constructed into a [class String]. This method [method _set_key] can be overidden in an extended class to add additional behaviors or to change or remove its existing behavior.
+func _set_key(_key) -> void: key = _key; if _key is String or str(_key) is String and str(_key).length() > 0: name = str(_key)
 
+## An instance of [class RefInstance] can be assigned a [member parent_instance] value, but this value is typically used for a [class Database] to reference another [class Database] that it is inside of, via the [member Database.data].
 var parent_instance: RefInstance: get = _get_parent_instance
+## The getting of member [member parent_instance] is overidden via method [method _get_parent_instance], which by default simply returns the value of member [member parent_instance], this method can be overidden in an extended class to add additional behavior.
 func _get_parent_instance() -> RefInstance: return parent_instance
 #endregion
 
