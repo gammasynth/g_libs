@@ -20,22 +20,22 @@
 
 extends RefCounted
 
-## [class RefInstance] is a debuggable, nameable, keyable, and operatable [class RefCounted] Object, with the ability to [method chat]/[method warn]/[method check] for logging/text-output, and [method start] and [method tick] for ordered operations.
+## [RefInstance] is a debuggable, nameable, keyable, and operatable [RefCounted] Object, with the ability to [method chat]/[method warn]/[method check] for logging/text-output, and [method start] and [method tick] for ordered operations.
 ##
-## [class RefInstance] can keep a reference to a [member parent_instance] that owns this instance, if there is one. Ownership of an instance can be an arbitrary scheme by the developer using the [class RefInstance], or it will be used to reference a parent [class Database] in the case that the instance is within a [class Database]'s [member Database.data].[br]
-## [br]
+## [RefInstance] can keep a reference to a [member parent_instance] that owns this instance, if there is one. Ownership of an instance can be an arbitrary scheme by the developer using the [RefInstance], or it will be used to reference a parent [Database] in the case that the instance is within a [Database]'s [member Database.data].[br]
+## [br] [br]
 ## The [method chat] method can be used to print messages by force, or only if [member debug] is true, the [method warn] and [method check] methods are useful for error debugging and catching, and can be used as conditional breakpoints.
-## [br]
+## [br] [br]
 ## Functional processes can be inserted in overridden tick operation functions, by overriding any of the operation methods ([method _start], [method _tick_started], [method _tick], [method _finish_tick]) in an extended class, helping with organized operation order systems.
-##[br]
-## [class RefInstance] is primarily intended to be a foundational base class for the [class Database] class to be built upon, and the [class RefCounted] class is faster to initialize and is reccommend over this class in most cases.
+## [br] [br]
+## [RefInstance] is primarily intended to be a foundational base class for the [Database] class to be built upon, and the [RefCounted] class is faster to initialize and is reccommend over this class in most cases.
 class_name RefInstance
 
 #region Instance Properties
 
-## The first [class RefInstance] instance to be initialized in a runtime will be declared the static [member origin_instance].
+## The first [RefInstance] instance to be initialized in a runtime will be declared the static [member origin_instance].
 static var origin_instance: RefInstance = null
-## The first [class RefInstance] instance to be initialized in a runtime becomes the [member origin_instance] and will enable this boolean for itself, and all other instances will have this boolean disabled.
+## The first [RefInstance] instance to be initialized in a runtime becomes the [member origin_instance] and will enable this boolean for itself, and all other instances will have this boolean disabled.
 var is_origin_instance: bool = false
 
 ## The signal [signal started] is emitted when the method [method start] is called, it is emitted prior to the execution of an overridden [method _start] method.
@@ -56,7 +56,7 @@ static var deep_debug_all: bool = false
 
 ## The static member [member allow_chat] is used as a global enabler/disabler for the ability for [method chat] calls to actually print to the primary output and log, and does not affect [method chat] having the capacity to output/call to an assigned [member chat_mirror_callable].
 static var allow_chat:bool = true
-## The static member [member chat_mirror_callable] is not used by default and is null or empty, the type is [class Variant] to allow the value to be null, but if a [class Callable] is assigned, then every [method chat] call will call this callable and will pass the chat to this callable.
+## The static member [member chat_mirror_callable] is not used by default and is null or empty, the type is [Variant] to allow the value to be null, but if a [Callable] is assigned, then every [method chat] call will call this callable and will pass the chat to this callable.
 static var chat_mirror_callable:Variant = null
 
 ## The signal [signal debug_toggled] is emitted with the current new debug boolean state every time the member [member debug] is changed/toggled.
@@ -82,12 +82,12 @@ func set_deep_debug(_deep_debug:bool) -> void: deep_debug_toggled.emit(_deep_deb
 ## The signal [signal name_changed] is emitted any time that the member [member name] is set/changed.
 signal name_changed(new_name: String, old_name: String)
 
-## The member [member name] can be used as a [class String] object identifier, whether generic per classtype or unique per instance.
+## The member [member name] can be used as a [String] object identifier, whether generic per classtype or unique per instance.
 var name : String = "OBJ": set = set_name
 ## The setting of member [member name] is overriden via method [method set_name], so that the signal [signal name_changed] can be emitted with both the new and the previous names.
 func set_name(_name) -> void: var old = name; name = _name; name_changed.emit(_name, old)
 
-## A [member persona] is not a [member name]. If an instance has a [member persona] assigned (it is an empty [class String] by default), then the [method chat] will use the [member persona] to identify itself in its chats rather than using its [member name]. An empty [class String] can be assigned to be used as a [member persona] as well.
+## A [member persona] is not a [member name]. If an instance has a [member persona] assigned (it is an empty [String] by default), then the [method chat] will use the [member persona] to identify itself in its chats rather than using its [member name]. An empty [String] can be assigned to be used as a [member persona] as well.
 var persona: String:
 	get:
 		if has_persona: return persona
@@ -100,14 +100,14 @@ var has_persona: bool = false
 #endregion
 
 #region Instance Key
-## A [member key] is a [class Variant] object identifier, and without changing the instance constructor behavior or manually assigning a [member key] value, the key will default to being the same as the [class String] [member name] value.
+## A [member key] is a [Variant] object identifier, and without changing the instance constructor behavior or manually assigning a [member key] value, the key will default to being the same as the [String] [member name] value.
 @export var key: Variant = null: get = _get_key, set = _set_key
 ## The getting of member [member key] is overidden via the method [method _get_key], and simply returns the member [member key] by default. This method [method _get_key] can be overidden in an extended class to add additional behaviors.
 func _get_key() -> Variant: return key
-## The setting of member [member key] is overidden via the method [method _set_key], and simply sets the member [member key] by default and also attempts to apply the new [member key] to the member [member name] if the new key value is a [class String] or if the new key value is able to be constructed into a [class String]. This method [method _set_key] can be overidden in an extended class to add additional behaviors or to change or remove its existing behavior.
+## The setting of member [member key] is overidden via the method [method _set_key], and simply sets the member [member key] by default and also attempts to apply the new [member key] to the member [member name] if the new key value is a [String] or if the new key value is able to be constructed into a [String]. This method [method _set_key] can be overidden in an extended class to add additional behaviors or to change or remove its existing behavior.
 func _set_key(_key) -> void: key = _key; if _key is String or str(_key) is String and str(_key).length() > 0: name = str(_key)
 
-## An instance of [class RefInstance] can be assigned a [member parent_instance] value, but this value is typically used for a [class Database] to reference another [class Database] that it is inside of, via the [member Database.data].
+## An instance of [RefInstance] can be assigned a [member parent_instance] value, but this value is typically used for a [Database] to reference another [Database] that it is inside of, via the [member Database.data].
 var parent_instance: RefInstance: get = _get_parent_instance
 ## The getting of member [member parent_instance] is overidden via method [method _get_parent_instance], which by default simply returns the value of member [member parent_instance], this method can be overidden in an extended class to add additional behavior.
 func _get_parent_instance() -> RefInstance: return parent_instance
@@ -116,7 +116,7 @@ func _get_parent_instance() -> RefInstance: return parent_instance
 #endregion
 
 
-
+## The [method _init] can be overridden in a new class that extends from [RefInstance], the new overidding function can change the function's parameters/argumentation, and it is reccommended to use the method super(_name, _key) to call this origin initializer function.
 func _init(_name:String="OBJ", _key:Variant=_name) -> void:
 	if origin_instance == null: 
 		origin_instance = self
@@ -126,12 +126,38 @@ func _init(_name:String="OBJ", _key:Variant=_name) -> void:
 	key = _key
 
 #region Instance Tick Operation
+## The [method start] can be used as an entry point for a class's intended operation whether one-pass or repeating functionality. [br]
+## If one wants to insert functionality into the [method start] function, they should override the [method _start] method. [br]
+## The signal [signal started] will fire prior to the calling and execution of the [method _start] method. [br]
+## The method [method _start] is called via an await in case of asynchronicity. [br]
+## The [method start] returns the error that [method _start] returns, which by default is OK.
 func start() -> Error: 
 	started.emit()
 	return await _start()
+## The [method start] method is the intended origin method to be called for operation, and this method [method _start] is called by the [method start] method. [br]
+## If a class extending from [RefInstance] does not override the [method _start], then by default, the [method _start] will only call the method [method tick]. [br]
+## The [method _start] returns the Error code returned from [method tick] by default, and should return an Error code if overridden.
 func _start() -> Error: return await tick()
 
-
+## The [method tick] method is a trisected operation, one that is typically meant to be reoccurring or to loop at some arbitrary interval. [br] [br]
+## Without overriding any of the following methods in an extended class ([method _tick_started], [method _tick], [method _finish_tick]) and also not passing in any [Callable]s for the following parameters ([param start_tick_callable], [param tick_callable], [param finish_tick_callable]), the method [method tick] will essentially do nothing except emit its [signal starting_tick] and [signal finished_tick] signals, and possibly [method chat].
+## [br] 
+## [br]
+## The order of operation is that signal [signal starting_tick] is fired, then [method _tick_started] is called, then the method [method _tick] is called, then the method [method _finish_tick] is called, and the signal [signal finished_tick] is fired after the functionalities' execution has been finished, before the function returns.
+## [br] [br]
+## Each of these segmented methods ([method _tick_started], [method _tick], [method _finish_tick]) can be replaced individually via feeding in any of the parameters ([param start_tick_callable], [param tick_callable], [param finish_tick_callable]) [Callable]s as arguments. A fed [Callable] argument takes precedence over an overridden sub-tick method.
+## [br] [br]
+## Each of the three segmented functions/[Callable]s should return an [Error] as OK if the function is successful, and each of these Error codes will be passed to the method [method check] named according to their functional segment.
+## [br] [br]
+## Each functional segment is called via an [method await], in case of asynchronicity. [br] 
+## [br]
+## An easy option for making a [method tick] method reoccurring or looping could be to, for example, override the [method _finish_tick] function or pass in a [Callable] function as an argument with code to trigger another call to the [method tick].
+## [br] Example: [br]
+## [codeblock]
+## func _finish_tick() -> Error:
+##     return tick()
+## [/codeblock][br]
+## The [method tick] returns an Error code, which will be from whatever last called interal overridden function and/or inserted [Callable] argument/parameter has returned, therefore any internal function should also return an Error code, and the [method tick] will stop upon catching a non-OK Error code with each [method check].
 func tick(start_tick_callable:Variant=null, tick_callable:Variant=null, finish_tick_callable:Variant=null) -> Error:
 	starting_tick.emit()
 	var err : Error 
