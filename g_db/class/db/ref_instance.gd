@@ -174,16 +174,37 @@ func tick(start_tick_callable:Variant=null, tick_callable:Variant=null, finish_t
 	check("finishing tick", err)
 	finished_tick.emit()
 	return err
-
+# TODO add something to remove "unneccessary await" warning in the tick function above.
+## The [method _tick_started] method is called from the [method tick] function, at the beginning of it, but this function [method _tick_started] is called after [signal starting_tick] has been fired.
 func _tick_started() -> Error: return OK
+## The [method _tick] method is called from the [method tick] function, at the middle of it.
 func _tick() -> Error: return OK
+## The [method _tick_started] method is called from the [method tick] function, at the end of it, prior to the emission of the [signal finished_tick] signal.
 func _finish_tick() -> Error: return OK
 #endregion
 
 #region Instance Debugging and Console
-## [chat] will output named prints, with color, by force or by [debug].
+## The [method chat] method will output named prints, with color, by [param force] or by [member debug]. [br]
+## If [member debug] and [member debug_all] and [param force] are all false, the [method chat] will do nothing except return immediately.
+## [br] [br]
+## The coloring of the text is handled via the [method Text.color] method, which receives the [param text] and [param clr] parameters as arguments.
+## [br] [br]
+## The [param clr] should be of type [member Text.COLORS], but can also be an [int] of value -1 to skip the action of coloring.
+## [br] [br]
+## The [String][member persona] is concatenated to the beginning of the [param text], except if [param text] [method String.is_empty] or the [param text] is one space character or if [param text] [method String.begins_with] the characters "^&".
+## [br] [br]
+## If [param text] [method String.is_empty] or the [param text] is one space character, the text will not be colored via [method Text.color], to reduce unnecessary script function calls.
+## [br] [br]
+## If a static [member chat_mirror_callable] has been assigned and the value is [Callable], every [method chat] will call [member chat_mirror_callable] and will pass the handled/named/colored [param text] to the function as an argument, regardless of whatever value [member allow_chat] has at a time.
+## [br] [br]
+## If [member allow_chat] is true, [method print_rich] will be called with the handled/named/colored [param text] passed as an argument, after [member chat_mirror_callable] has been checked/called. [br]
+## The method [method print_rich] is used instead of [method print] to handle and serve the BBCode color formatting that may be inserted around [param text].
+## [br] [br]
+## If the parameter [param return_ok] is given a true as an argument, the [method chat] will return an [Error] OK instead of returning null.
 func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok:bool=false) -> Variant:
-	if not debug and not force: return
+	if not debug and not force: 
+		if return_ok: return OK
+		else: return null
 	
 	var empty:bool=false
 	if text.is_empty() or text == " ":
@@ -206,20 +227,30 @@ func chat(text:String, clr:Variant=Text.COLORS.gray, force:bool=false, return_ok
 	if return_ok: return OK
 	return null
 
-## [chatf] will force a [chat] without needing to send a true boolean.
+## The [method chatf] method will force a [method chat] without needing to send a true boolean argument and without needing [member debug] or [member debug_all] enabled.
 func chatf(text:String, clr:Variant=-1) -> Variant: return chat(text, clr, true)
 
-## [chatd] will force a [chat] during [deep_debug].
+## The [method chatd] method will force a [method chat] during [member deep_debug] or [member deep_debug_all] without needing to send a true boolean argument and without needing [member debug] or [member debug_all] enabled.
 func chatd(text:String, clr:Variant=Text.COLORS.gray, return_ok:bool=false) -> Variant: 
 	if deep_debug: return chat(text, clr, deep_debug, return_ok)
 	else: return 
 
-## [warn] can be called with just text to [chat] a red message. [br] [br]
-## If [warn] is called with an Error code passed as a second parameter, it will: [br]
+## The [method warn] method can be called with just text to force [method chat] a red message. [br] [br]
+## The [method warn] is primarily used for error catching and possibly breakpointing during [method chat]s.
+## [br] [br]
+## If [method warn] is called with an Error code passed as a second parameter, it will: [br]
 ## - Not print anything if err == OK [br]
-## - Append the string converstion of the Error code to the end of the text using [error_string]. [br] [br]
-## By default, the text "Error " is added to the beginning of the text message, if [is_error], otherwise, the text will be yellow.
-## The editor debuggger can be given a breakpoint pause from the warn message using [can_break].
+## - Append the string converstion of the Error code to the end of the text using [method error_string]. [br] [br]
+## By default, the text "Error " is added to the beginning of the text message, if [param is_error], otherwise, the text will be yellow.[br] [br]
+## The editor debuggger can be given a breakpoint pause from the warn message using [param can_break].[br] [br]
+## If [param err] is ERR_PRINTER_ON_FIRE, the [method error_string] will not be appended to [param text], and the text will be red in color, else the color will be orange if [param is_error].[br] [br]
+## The breakpoint functionality will only break if both [param is_error] and [param can_break] are both true, but [param is_error] will set itself false prior to the break if [param err] is OK or ERR_PRINTER_ON_FIRE.
+## [br] [br]
+## The [method chat] called from [method warn] will only be forced if [param err] is not OK or ERR_PRINTER_ON_FIRE, but if [param is_error] is false the forcing will default to whatever [member debug] or [member debug_all] is.
+## [br] [br]
+## If the [method warn] is attempting to force the [method chat] and [param can_break] is true, then instead of [method chat], the method [method push_error] will be used if [param is_error], or else the method [method push_warning] will be used if the [param err] is not OK or ERR_PRINTER_ON_FIRE.
+## [br] [br]
+## If one wants the actual keyword function breakpoint to be called when using [param can_break], ensure that [param is_error] is true and that the [param err] is a value other than Error OK or ERR_PRINTER_ON_FIRE.
 func warn(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:bool=true, can_break:bool=false) -> void:
 	var force: bool = err != OK; if force and err != ERR_PRINTER_ON_FIRE: text = str(text + ": " + error_string(err))
 	var color = Text.COLORS.orange; if is_error and err == ERR_PRINTER_ON_FIRE: color = Text.COLORS.red
@@ -241,11 +272,13 @@ func warn(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:b
 			chat(text, color, force)
 	if is_error and can_break: breakpoint
 
-## [warnd] will do a warning only during [deep_debug].
+## The [method warnd] method will perform a [method warn] only during [member deep_debug] or [member deep_debug_all].
 func warnd(text: String = "WARNING", err: Error = ERR_PRINTER_ON_FIRE, is_error:bool=true, can_break:bool=false) -> void: if deep_debug: warn(text, err, is_error, can_break)
 
+## The [method check] method is a [method warn] that is used specifically for non-OK Error code catching and breakpointing. [br][br]
+## Simply send in a [String] [param text] and a non-OK and non-ERR_PRINTER_ON_FIRE Error code as an [param err] to have a [method warn] perform a forced [method chat] and also hit a breakpoint.
 func check(text: String = "function_name", err: Error = OK) -> void: warn(text, err, true, true)
 
+## The [method checkd] method is a [method check] that will only occur if [member deep_debug] or [member deep_debug_all].
 func checkd(text: String = "function_name", err: Error = OK) -> void: if deep_debug: warn(text, err, true, true)
-
 #endregion
