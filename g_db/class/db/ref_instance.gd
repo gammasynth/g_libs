@@ -129,7 +129,7 @@ func _init(_name:String="OBJ", _key:Variant=_name) -> void:
 ## The [method start] can be used as an entry point for a class's intended operation whether one-pass or repeating functionality. [br]
 ## If one wants to insert functionality into the [method start] function, they should override the [method _start] method. [br]
 ## The signal [signal started] will fire prior to the calling and execution of the [method _start] method. [br]
-## The method [method _start] is called via an await in case of asynchronicity. [br]
+## The method [method _start] is called via an await keyword in case of asynchronicity. [br]
 ## The [method start] returns the error that [method _start] returns, which by default is OK.
 func start() -> Error: 
 	started.emit()
@@ -147,9 +147,9 @@ func _start() -> Error: return await tick()
 ## [br] [br]
 ## Each of these segmented methods ([method _tick_started], [method _tick], [method _finish_tick]) can be replaced individually via feeding in any of the parameters ([param start_tick_callable], [param tick_callable], [param finish_tick_callable]) [Callable]s as arguments. A fed [Callable] argument takes precedence over an overridden sub-tick method.
 ## [br] [br]
-## Each of the three segmented functions/[Callable]s should return an [Error] as OK if the function is successful, and each of these Error codes will be passed to the method [method check] named according to their functional segment.
+## Each of the three segmented functions/[Callable]s should return an Error as OK if the function is successful, and each of these Error codes will be passed to the method [method check] named according to their functional segment.
 ## [br] [br]
-## Each functional segment is called via an [method await], in case of asynchronicity. [br] 
+## Each functional segment is called via an await keyword, in case of asynchronicity. [br] 
 ## [br]
 ## An easy option for making a [method tick] method reoccurring or looping could be to, for example, override the [method _finish_tick] function or pass in a [Callable] function as an argument with code to trigger another call to the [method tick].
 ## [br] Example: [br]
