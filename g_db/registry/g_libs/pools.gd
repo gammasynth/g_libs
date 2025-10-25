@@ -60,3 +60,8 @@ func _boot_registry():
 			if not subregistry_paths.has(n): return true
 			return false))
 	return OK
+
+func _boot_finished() -> Error: 
+	# with current Registry implementation 10/25/2025 this function should occur after app initialization and registry files are loaded.
+	ClassNameDB.instance.data.merge(data)
+	return OK

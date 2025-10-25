@@ -44,36 +44,64 @@ var data:Dictionary = {}
 ## The [member data_mutex] is used to lock and unlock around accessing the [member data], in order to maintain thread-safety during multi-threaded operations.
 var data_mutex: Mutex = Mutex.new()
 
-
-func keys() -> Array: return _keys()
-func _keys() -> Array: 
+## The [method keys] will return the key values from the [member data]. [br][br]
+## The [param same_keys] argument can be given a true to return the same array from the [method Dictionary.keys] instead of calling [method Array.duplicate] on that resulting array. [br][br]
+## The [method keys] is a namespace function that simply calls the [method _keys] function.
+func keys(same_keys:bool=false) -> Array: return _keys(same_keys)
+## The [method _keys] is called via the [method keys]. [br][br]
+## The [method _keys] will return the key values from the [member data]. [br][br]
+## The [param same_keys] argument can be given a true to return the same array from the [method Dictionary.keys] instead of calling [method Array.duplicate] on that resulting array. [br][br]
+## The [member data_mutex] is locked and unlocked prior to and after accessing the [member data], for thread safety.
+func _keys(same_keys:bool=false) -> Array: 
 	data_mutex.lock()
-	var ks:Array = data.keys().duplicate()
+	var ks:Array = []
+	if same_keys: ks = data.keys()
+	else: ks = data.keys().duplicate()
 	data_mutex.unlock()
 	return ks
 
+## The [method _clear] will call the [method Dictionary.clear] method upon [member data]. [br][br]
+## The [method clear] is a namespace function for the [method _clear] function.
 func clear() -> void: return _clear()
+## The [method _clear] is called via the [method clear]. [br][br]
+## The [method _clear] will call the [method Dictionary.clear] method upon [member data]. [br][br]
+## The [member data_mutex] is locked and unlocked prior to and after accessing the [member data], for thread safety.
 func _clear() -> void: 
 	data_mutex.lock()
 	data.clear()
 	data_mutex.unlock()
 
+## The [method _data_size] will call the [method Dictionary.size] method upon [member data]. [br][br]
+## The [method data_size] is a namespace function for the [method _data_size] function.
 func data_size() -> int: return _data_size()
+## The [method _data_size] is called via the [method data_size]. [br][br]
+## The [method _data_size] will call the [method Dictionary.size] method upon [member data]. [br][br]
+## The [member data_mutex] is locked and unlocked prior to and after accessing the [member data], for thread safety.
 func _data_size() -> int: 
 	data_mutex.lock()
 	var s:int = data.size()
 	data_mutex.unlock()
 	return s
 
+## The [method _is_empty] will call the [method Dictionary.is_empty] method upon [member data]. [br][br]
+## The [method is_empty] is a namespace function for the [method _is_empty] function.
 func is_empty() -> bool: return _is_empty()
+## The [method _is_empty] is called via the [method is_empty]. [br][br]
+## The [method _is_empty] will call the [method Dictionary.is_empty] method upon [member data]. [br][br]
+## The [member data_mutex] is locked and unlocked prior to and after accessing the [member data], for thread safety.
 func _is_empty() -> bool: 
 	data_mutex.lock()
 	var e:bool = data.is_empty()
 	data_mutex.unlock()
 	return e
 
+## The [method _has] uses the in keyword as an operator upon the [member data].
+## The [method has] is a namespace function for the [method _has] function, which passes the [param key_entry] argument.
 func has(key_entry:Variant) -> bool: return _has(key_entry)
+## The [method _has] is called by [method has], and receives its argument from that function.[br][br]
 func _has(key_entry:Variant) -> bool: 
+	# TODO implement data_mutex locking somehow whilst still using grab(key_entry) to determine 0 or null value
+	# TODO implement checking for null value alongside checking for zero to return a false has()
 	var does:bool = key_entry in data
 	if does:
 		var v: Variant = grab(key_entry)
@@ -139,7 +167,9 @@ func _erase(at_key:Variant) -> bool:
 	data_mutex.unlock()
 	return erased
 
+## @experimental
 func erase_value(value:Variant, at_key:Variant=null) -> bool: return _erase_value(value, at_key)
+## @experimental
 func _erase_value(value:Variant, at_key:Variant=null) -> bool:
 	# TODO implement mutex locking!
 	if not value and not at_key: return true
