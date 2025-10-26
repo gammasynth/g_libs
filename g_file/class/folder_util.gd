@@ -1,9 +1,11 @@
 #|*******************************************************************
 # folder_util.gd
 #*******************************************************************
-# This file is part of g_libs. 
-# g_libs is an open-source software codebase.
+# This file is part of g_libs.
+# 
+# g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
 # Gammasynth (Gammasynth Software), Texas, U.S.A.
@@ -17,6 +19,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 
 class_name FolderUtil
 
@@ -82,14 +85,26 @@ static func get_all_filepaths_from_directory(file_path:String, whitelist_extensi
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
-		if blacklist_file_names.has(file_name): continue
+		if blacklist_file_names.has(file_name): 
+			file_name = dir.get_next()
+			continue
+		if blacklist_file_names.has(FileUtil.get_file_name_from_file_path(file_name)): 
+			file_name = dir.get_next()
+			continue
 		if not dir.current_is_dir(): 
 			var allowed_file = true
 			var fp:String = str(file_path + file_name)
-			if blacklist_file_names.has(fp): continue
+			# ?????????????
+			if blacklist_file_names.has(fp): 
+				file_name = dir.get_next()
+				continue
 			var ext: String = file_name.get_extension()
-			if blacklist_file_names.has(fp.substr(0, fp.find(ext))): continue
-			if blacklist_file_names.has(file_name.substr(0, file_name.find(ext))): continue
+			if blacklist_file_names.has(fp.substr(0, fp.find(ext))): 
+				file_name = dir.get_next()
+				continue
+			if blacklist_file_names.has(file_name.substr(0, file_name.find(ext))): 
+				file_name = dir.get_next()
+				continue
 			# if current File in list is valid and not a SubDirectory, collect filepath for list
 			if not whitelist_extension.is_empty() and ext != whitelist_extension: allowed_file = false
 			if allowed_file: 

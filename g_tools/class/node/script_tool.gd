@@ -1,9 +1,11 @@
 #|*******************************************************************
 # script_tool.gd
 #*******************************************************************
-# This file is part of g_libs. 
-# g_libs is an open-source software codebase.
+# This file is part of g_libs.
+# 
+# g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
 # Gammasynth (Gammasynth Software), Texas, U.S.A.
@@ -17,6 +19,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 
 @tool
 extends Node
@@ -207,17 +210,28 @@ func do_update_files_licensing():
 		var text: String = file.get_as_text()
 		
 		if text.containsn(main_license_bracket):
+			
 			var start: int = text.findn(main_license_bracket)
+			print("ScriptTool | found existing license start bracket! @ char: " + str(start))
+			
 			var pre_length: int = start + main_license_bracket.length()
 			var remaining_text: String = text.substr(pre_length)
 			var next_bracket: int = remaining_text.findn(main_license_bracket)
-			if next_bracket != -1: next_bracket += main_license_bracket.length()
+			if next_bracket != -1: 
+				print("ScriptTool | found existing next bracket! @ char: " + str(next_bracket))
+				#next_bracket += pre_length
 			else: next_bracket = 0
-			var end: int = pre_length + next_bracket
+			var end: int = pre_length + next_bracket + main_license_bracket.length()
 			var old_license:String = text.substr(start, end - start)
-			text.replace(old_license, "")
+			text = text.replace(old_license, "")
+			print("ScriptTool | removed previous file licensing!")
 		
-		if license_files: text = str(this_licensing + "\n" + text)
+		# WARN this commented code removed every newline from scripts currently...
+		#if text.begins_with("\n"):
+			#while text.begins_with("\n"): text = text.replace("\n", "")
+			#print("ScriptTool | removed whitespace newlines at beginning of file...")
+		
+		if license_files: text = str(this_licensing + text)
 		
 		file.resize(0)# WARN
 		file.store_string(text)
