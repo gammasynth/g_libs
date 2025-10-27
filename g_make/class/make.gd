@@ -105,13 +105,13 @@ static func fade_in(node:CanvasItem, duration:float = 1.0, disable_controls:bool
 	return do_fade(node, Color(1.0, 1.0, 1.0, 1.0), duration, disable_controls)
 
 
-static func do_fade(node:CanvasItem, to_color:Color=Color(0.0, 0.0, 0.0, 0.0), duration:float = 1.0, disable_controls:bool=true, trans:Tween.TransitionType=Tween.TRANS_BACK, ease:Tween.EaseType=Tween.EASE_OUT) -> Tween:
+static func do_fade(node:CanvasItem, to_color:Color=Color(0.0, 0.0, 0.0, 0.0), duration:float = 1.0, disable_controls:bool=true, trans:Tween.TransitionType=Tween.TRANS_BACK, ease_type:Tween.EaseType=Tween.EASE_OUT) -> Tween:
 	if not node or not is_instance_valid(node): push_error("Make.fade_out(): node is already null or invalid instance!"); return null
 	
 	if disable_controls: disable_control(node)
 	
 	var tween: Tween = node.create_tween().set_parallel()
-	tween.tween_property(node, "modulate", to_color, duration).set_trans(trans).set_ease(ease)
+	tween.tween_property(node, "modulate", to_color, duration).set_trans(trans).set_ease(ease_type)
 	return tween
 
 static func fade_delete(node:CanvasItem, duration:float = 1.0, disable_controls:bool=true) -> void:
