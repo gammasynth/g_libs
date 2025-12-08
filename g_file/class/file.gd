@@ -48,7 +48,7 @@ static func get_all_filepaths_from_directory(file_path:String, whitelist_extensi
 
 ## Return all FilePaths within a Folder and within every Subfolder, Recursively.
 ## @experimental: useful?
-static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, inlcude_hidden:bool=false, blacklist_folder_names:Array[String]=[], blacklist_file_names:Array[String]=[]) -> Variant: return FolderUtil.search_for_file_paths_recursively(folder_path, as_dictionary, extra_folder, inlcude_hidden, blacklist_folder_names, blacklist_file_names)
+static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, inlcude_hidden:bool=false, blacklist_folder_names:Array=[], blacklist_file_names:Array=[]) -> Variant: return FolderUtil.search_for_file_paths_recursively(folder_path, as_dictionary, extra_folder, inlcude_hidden, blacklist_folder_names, blacklist_file_names)
 #endregion
 
 #endregion

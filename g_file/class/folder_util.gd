@@ -49,7 +49,7 @@ static func get_folder(path:String, full_path:bool=false) -> String:
 
 #region Directory Elements Methods
 ## Scan a Directory for Directories, return an Array[String] each Directory's path (or full_path)
-static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false, blacklist_folder_names:Array[String]=[]) -> Array[String]:
+static func get_all_directories_from_directory(folder_path:String, full_path:bool=false, recursive:bool=false, blacklist_folder_names:Array=[]) -> Array[String]:
 	var filepaths: Array[String] = []
 	
 	folder_path = FileUtil.ends_with_slash(folder_path)
@@ -59,8 +59,12 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 	# Use DirAccess to list through the Directory's contents as FileName Strings
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
-	while file_name != "":
-		if blacklist_folder_names.has(file_name): continue
+	var last_fn:String = file_name
+	var idx:int = 0
+	while file_name != "" and idx < 3:
+		if blacklist_folder_names.has(file_name): 
+			file_name = dir.get_next();
+			continue
 		if dir.current_is_dir():
 			# if current Directory in list is valid and not a File, collect Directory path for list
 			var fp: String = FileUtil.ends_with_slash(str(folder_path + file_name))
@@ -70,7 +74,10 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 			
 			if recursive: filepaths.append_array(get_all_directories_from_directory(fp, full_path, recursive))
 			
+		last_fn = file_name
 		file_name = dir.get_next();
+		if last_fn == file_name: idx += 1
+		else: idx = 0
 	# Return the Array list of Directory Path Strings
 	return filepaths
 
@@ -78,7 +85,7 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 
 ## Scan a Directory for files, return an Array of each file's path (or full_path)
 ## A whitelist can be used to only collect files of certain extensions
-static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array[String]=[]) -> Array[String]:
+static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array=[]) -> Array[String]:
 	var filepaths: Array[String] = []
 	var dir = DirAccess.open(file_path); if not dir: return [];
 	# Use DirAccess to list through the Directory's contents as FileName Strings
@@ -116,7 +123,7 @@ static func get_all_filepaths_from_directory(file_path:String, whitelist_extensi
 
 ## Return all FilePaths within a Folder and within every Subfolder, Recursively.
 ## @experimental: useful?
-static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, include_hidden:bool=false, blacklist_folder_names:Array[String]=[], blacklist_file_names:Array[String]=[]) -> Variant:#, is_absolute_path:bool=false) -> Dictionary:
+static func search_for_file_paths_recursively(folder_path:String, as_dictionary:bool=false, extra_folder:bool=true, include_hidden:bool=false, blacklist_folder_names:Array=[], blacklist_file_names:Array=[]) -> Variant:#, is_absolute_path:bool=false) -> Dictionary:
 	var this_directory_dict: Dictionary = {}
 	var this_directory_folder_dict: Dictionary = {}
 	var this_directory_file_dict: Dictionary = {}
