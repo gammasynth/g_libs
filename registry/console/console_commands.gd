@@ -33,5 +33,7 @@ func _boot_registry():
 		
 	]
 	check_folder_for_folder("res://", "commands", (func(n): directories_to_load.append(n)), true)
+	if directories_to_load.has("res://user/commands/test.gd"): directories_to_load.erase("res://user/commands/test.gd")
+	
 	check_folder_for_folder("user://", "commands", (func(n): directories_to_load.append(n)), true)
 	return OK
