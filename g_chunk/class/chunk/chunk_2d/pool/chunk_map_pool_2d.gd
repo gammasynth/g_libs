@@ -46,7 +46,7 @@ func get_pool_name(pool_name_suffix:String="") -> String:
 
 func _data_size() -> int: return index_size
 
-func _keys(pool_name_suffix:String="") -> Array:
+func _keys(same_keys:bool=false, pool_name_suffix:String="") -> Array:
 	if pool_name_suffix.length() > 0 and not pool_name_suffix.begins_with("/"): pool_name_suffix = str("/"+pool_name_suffix)
 	var pool_name:String = get_pool_name(pool_name_suffix)
 	if access_chunks:

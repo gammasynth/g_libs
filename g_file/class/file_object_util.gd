@@ -164,7 +164,7 @@ static func deserialize_object(dict:Dictionary, _obj:Object=null) -> Object:
 
 
 
-static func deserialize_value(value:Variant) -> Variant:
+static func deserialize_value(value:Variant, allow_objects:bool=true, allow_callables:bool=true) -> Variant:
 	
 	if value is String:
 		var test = str_to_var(value)
@@ -178,7 +178,7 @@ static func deserialize_value(value:Variant) -> Variant:
 			value = test
 	
 	if value is Dictionary:
-		if value.has("IS_SERIALIZED_OBJECT"):
+		if value.has("IS_SERIALIZED_OBJECT") and allow_objects:
 			return deserialize_object(value)
 		
 		if value.has("IS_COLOR_VALUE"):
@@ -237,7 +237,7 @@ static func deserialize_value(value:Variant) -> Variant:
 			var tex: ImageTexture = ImageTexture.create_from_image(deserialize_value(value.get("IMAGE")))
 			return tex
 		
-		if value.has("IS_CALLABLE_VALUE"):
+		if value.has("IS_CALLABLE_VALUE") and allow_callables:
 			var obj:Object = null
 			if value.has("ONLY_OBJECT_IDENTIFIER"):
 				var object_id = value.get("ONLY_OBJECT_IDENTIFIER")
@@ -262,14 +262,14 @@ static func deserialize_value(value:Variant) -> Variant:
 		var dict := {}
 		for key in value.keys():
 			var entry = value[key]
-			var new_key = deserialize_value(key)
-			var new_entry = deserialize_value(entry)
+			var new_key = deserialize_value(key, allow_objects, allow_callables)
+			var new_entry = deserialize_value(entry, allow_objects, allow_callables)
 			dict[new_key] = new_entry
 		return dict
 	elif value is Array:
 		var arr := []
 		for entry in value:
-			entry = deserialize_value(entry)
+			entry = deserialize_value(entry, allow_objects, allow_callables)
 			arr.append(entry)
 		value = arr
 	return value
@@ -281,7 +281,7 @@ static func deserialize_value(value:Variant) -> Variant:
 		#return true
 	#return false
 
-static func serialize_value(value:Variant) -> Variant:
+static func serialize_value(value:Variant, allow_objects:bool=true, allow_callables:bool=true) -> Variant:
 	
 	if value is bool or value is int or value is float or value is String: return value
 	
@@ -351,9 +351,9 @@ static func serialize_value(value:Variant) -> Variant:
 		dict.set("IS_IMAGETEXTURE_VALUE", true)
 		dict.set("IMAGE", serialize_value(value.get_image()))
 		value = dict
-	elif value is Object:
+	elif value is Object and allow_objects:
 		value = serialize_object(value)
-	elif value is Callable:
+	elif value is Callable and allow_callables:
 		# try to serialize callable
 		if not value.is_valid():
 			push_error("TRIED TO SERIALIZE NON-VALID CALLABLE!")
@@ -461,6 +461,8 @@ static func serialize_object(obj:Object, obj_dict:Dictionary={}) -> Dictionary:
 		var value = obj.get(property)
 		if value is Transform2D or value is Transform3D: continue
 		
+		if not value: continue
+		
 		if value is Node:
 			var existing:Variant = search_for_object_by_id(value.get_instance_id())
 			if existing != null: 
@@ -502,6 +504,8 @@ static func serialize_script_properties(script:Script, obj:Object, script_dict:D
 		var value = obj.get(property)
 		if property == "multiplayer": continue
 		if value is Transform2D or value is Transform3D: continue
+		
+		if not value: continue
 		
 		if value is Node:
 			var existing:Variant = search_for_object_by_id(value.get_instance_id())
@@ -575,6 +579,7 @@ static func search_for_object_by_id(obj_id:int, dict:Dictionary=current_dictiona
 			#if found != null: return found
 	for key in dict:
 		var val = dict.get(key)
+		if dict.has("STRING_DATA"): continue
 		if val is Dictionary:
 			#if searched_dictionaries.has(val.hash()): continue
 			var found:Variant = search_for_object_by_id(obj_id, val)#, searched_dictionaries)
