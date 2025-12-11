@@ -45,6 +45,9 @@ var pipe_stderr:FileAccess = null
 var pipe_pid:int = -1
 var pipe_time:float = 0.0
 
+var max_pipe_stdio_read_attempts:int = 100
+var max_pipe_stderr_read_attempts:int = 100
+
 var received_pipe_data:bool=false
 
 var monitor_thread:Thread = null
@@ -247,35 +250,38 @@ func get_pipe_io() -> Array:
 	var pipe_read_attempts:int = 0
 	var failed_stdio:bool=false
 	var failed_stderr:bool=false
+	
 	while !pipe_stdio.eof_reached():
 		var line = pipe_stdio.get_line()
 		if line.is_empty(): 
-			#pipe_read_attempts += 1
-			#if pipe_read_attempts > 3:
+			pipe_read_attempts += 1
+			if pipe_read_attempts > max_pipe_stdio_read_attempts:
 				failed_stdio = true
 				break
 		else: lines.append(line)
+	
+	pipe_read_attempts = 0
 	while !pipe_stderr.eof_reached():
 		var line = pipe_stderr.get_line()
 		if line.is_empty(): 
-			#pipe_read_attempts += 1
-			#if pipe_read_attempts > 3:
+			pipe_read_attempts += 1
+			if pipe_read_attempts > max_pipe_stderr_read_attempts:
 				failed_stderr = true
 				break
 		else: lines.append(line)
 	
 	#if failed_stdio and failed_stderr: stop_pipe()
 	#print("COMMAND RUNNING: " + str(OS.is_process_running(pipe_pid)))
-	var lines_cleaned:Array = []
+	#var lines_cleaned:Array = []
 	if not lines.is_empty(): 
-		for line:String in lines:
-			lines_cleaned.append(line)
-			for rni in line.count(("\r\n" as String)):
-				lines_cleaned.append(" ")
-				#print("SPECIAL CHARACTERS")
-			for ni in line.count(("\n" as String)):
-				lines_cleaned.append(" ")
-				#print("SPECIAL CHARACTERS")
+		#for line:String in lines:
+			#lines_cleaned.append(line)
+			#for rni in line.count(("\r\n" as String)):
+				#lines_cleaned.append(" ")
+				##print("SPECIAL CHARACTERS")
+			#for ni in line.count(("\n" as String)):
+				#lines_cleaned.append(" ")
+				##print("SPECIAL CHARACTERS")
 		received_pipe_data = true
 		pipe_time = 0.0
 	execution_mutex.unlock()
@@ -342,6 +348,7 @@ func process(delta: float) -> void:# this can be called externally for threaded 
 	
 	if not is_piping: 
 		if uses_threads:
+			print_pipe_io()
 			var output:Array = execution_thread.wait_to_finish()
 			finish_execution(output)
 		else: finish_execution([" ", "Process terminated.", " "])
