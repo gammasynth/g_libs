@@ -5,6 +5,7 @@
 # 
 # g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# 
 # https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
@@ -19,6 +20,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 
 
 @tool
@@ -49,9 +51,9 @@ class_name ShaderTool
 
 func get_shaders() -> Array[Shader]:
 	var shaders:Array[Shader] = []
-	var file_paths : Array[String] = FileTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
+	var file_paths : Array[String] = FileUtilTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
 	for file_path in file_paths:
-		if FileTool.is_valid_godot_resource(file_path):
+		if FileUtilTool.is_valid_godot_resource(file_path):
 			var file = load(file_path)
 			var shader: Shader = null; if file is Shader: shader = file
 			if not shader:
@@ -61,7 +63,7 @@ func get_shaders() -> Array[Shader]:
 	return shaders
 
 func convert_shaders_to_shader_includes_action():
-	var file_paths : Array[String] = FileTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
+	var file_paths : Array[String] = FileUtilTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
 	var shaders:Array[Shader] = get_shaders()
 	var idx:int = 0
 	for shader:Shader in shaders:
@@ -80,10 +82,10 @@ func convert_shaders_to_shader_includes_action():
 		inc.code = code
 		
 		var file_path = file_paths.get(idx)
-		var fn: String = FileTool.get_file_name_from_file_path(file_path)
+		var fn: String = FileUtilTool.get_file_name_from_file_path(file_path)
 		fn = str(fn + ".gdshaderinc")
 		
-		var fp : String = str(FileTool.ends_with_slash(output_folder) + fn)
+		var fp : String = str(FileUtilTool.ends_with_slash(output_folder) + fn)
 		
 		if FileAccess.file_exists(fp): 
 			if not force_overwrites:
@@ -99,7 +101,7 @@ func convert_shaders_to_shader_includes_action():
 
 
 func convert_shaders_to_shader_materials_action():
-	var file_paths : Array[String] = FileTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
+	var file_paths : Array[String] = FileUtilTool.get_all_filepaths_from_directory(folder_of_shaders, "", true)
 	var shaders:Array[Shader] = get_shaders()
 	var idx:int = 0
 	for shader:Shader in shaders:
@@ -107,10 +109,10 @@ func convert_shaders_to_shader_materials_action():
 		mat.shader = shader
 		
 		var file_path = file_paths.get(idx)
-		var fn: String = FileTool.get_file_name_from_file_path(file_path)
+		var fn: String = FileUtilTool.get_file_name_from_file_path(file_path)
 		fn = str(fn + ".material")
 		
-		var fp : String = str(FileTool.ends_with_slash(output_folder) + fn)
+		var fp : String = str(FileUtilTool.ends_with_slash(output_folder) + fn)
 		
 		if FileAccess.file_exists(fp): 
 			if not force_overwrites:

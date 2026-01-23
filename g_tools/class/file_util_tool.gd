@@ -1,10 +1,11 @@
 #|*******************************************************************
-# file_tool.gd
+# file_util_tool.gd
 #*******************************************************************
 # This file is part of g_libs.
 # 
 # g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# 
 # https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
@@ -21,7 +22,8 @@
 #|*******************************************************************
 
 
+
 @tool
 extends File
 ## This Class is Object-based, not Node-based!
-class_name FileTool
+class_name FileUtilTool

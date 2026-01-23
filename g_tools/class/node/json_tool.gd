@@ -1,5 +1,5 @@
 #|*******************************************************************
-# registry_entry.gd
+# json_tool.gd
 #*******************************************************************
 # This file is part of g_libs.
 # 
@@ -20,35 +20,39 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+@tool
+extends Node
+class_name JsonTool
 
+@export var data : Dictionary = {}
+@export_global_file() var json_file = ""
+@export var new_file_path:String = ""
+@export var encryption_key : String = ""
 
+@export_tool_button("Read Json Data from File") var read_data_action: Callable = read_data
+@export_tool_button("Write Json Data to File") var write_data_action: Callable = write_data
 
-extends Database
+func validate_path(path:Variant) -> bool:
+	if typeof(path) == 0 or not path or (path is String and path.is_empty()): return false
+	return true
 
-class_name RegistryEntry
+func read_data() -> void: 
+	var path = json_file; if not validate_path(path): path = new_file_path
+	if not validate_path(path):
+		print("JsonTool | Error: No valid path!")
+		return
+	
+	data = FileUtilTool.load_dict_file(path, encryption_key)
+	print("JsonTool | Loaded file!")
+	print(data)
 
-
-static func make_entry(with_entry_name:String) -> RegistryEntry:
-	return RegistryEntry.new(with_entry_name)
-
-
-func setup_entry():
-	return _setup_entry()
-
-func _setup_entry():
-	pass
-
-
-func asset_registered(file_name:String) -> Error:
-	chatd("RegistryEntry: " + name + " | " + " asset registered: " + file_name)
-	return OK
-
-func register_asset(file_name:String, asset:Variant) -> Error:
-	chatd("RegistryEntry: " + name + " | " + " registering asset: " + file_name)
-	if await _register_asset(file_name, asset) == OK: return asset_registered(file_name);
-	if not data.has(file_name): data[file_name] = asset; return asset_registered(file_name)
-	return ERR_ALREADY_EXISTS
-
-func _register_asset(_file_name:String, _asset:Variant) -> Error: return ERR_DATABASE_CANT_READ
-
-func is_entry() -> bool: return true
+func write_data() -> void: 
+	var path = json_file; if not validate_path(path): path = new_file_path
+	if not validate_path(path):
+		print("JsonTool | Error: No valid path!")
+		return
+	
+	var err:Error = FileUtilTool.save_dict_file(data, path, encryption_key)
+	if err == OK: print("JsonTool | Saved file!" )
+	else: print(str("Err == " + str(err) + " " + error_string(err)))
+	

@@ -5,6 +5,7 @@
 # 
 # g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# 
 # https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
@@ -19,6 +20,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 
 
 @tool
@@ -42,7 +44,7 @@ class_name ResourceTool
 
 
 func do_create_animated_texture() -> void:
-	var image_file_paths: Array[String] = FileTool.get_all_filepaths_from_directory(operation_path, "", true)
+	var image_file_paths: Array[String] = FileUtilTool.get_all_filepaths_from_directory(operation_path, "", true)
 	
 	
 	for fp:String in image_file_paths:

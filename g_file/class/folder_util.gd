@@ -5,6 +5,7 @@
 # 
 # g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# 
 # https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
@@ -19,6 +20,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 
 
 class_name FolderUtil
@@ -85,7 +87,7 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 
 ## Scan a Directory for files, return an Array of each file's path (or full_path)
 ## A whitelist can be used to only collect files of certain extensions
-static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array=[]) -> Array[String]:
+static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array=[]) -> Array:
 	var filepaths: Array[String] = []
 	var dir = DirAccess.open(file_path); if not dir: return [];
 	# Use DirAccess to list through the Directory's contents as FileName Strings

@@ -1,14 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://bi888t1r21bnb"]
+[gd_scene load_steps=5 format=3 uid="uid://bi888t1r21bnb"]
 
-[ext_resource type="Script" uid="uid://bisb2u68xujde" path="res://lib/g_libs/g_tools/class/node/script_tool.gd" id="1_jrw37"]
+[ext_resource type="Script" uid="uid://bisb2u68xujde" path="res://lib/g_libs/g_tools/class/node/file_tool.gd" id="1_jrw37"]
 [ext_resource type="Script" uid="uid://ccsjans7h6adl" path="res://lib/g_libs/g_tools/class/node/shader_tool.gd" id="2_o32pp"]
 [ext_resource type="Script" uid="uid://cblsx5pf8ukcu" path="res://lib/g_libs/g_tools/class/node/resource_tool.gd" id="3_5yp2k"]
+[ext_resource type="Script" uid="uid://bwqgyhwtyfev8" path="res://lib/g_libs/g_tools/class/node/json_tool.gd" id="4_kbthd"]
 
 [node name="ToolNode" type="Node"]
 
-[node name="ScriptTool" type="Node" parent="."]
+[node name="FileTool" type="Node" parent="."]
 script = ExtResource("1_jrw37")
-control_script_path = "res://lib/g_libs/g_db/class/node/database_node.gd"
 
 [node name="ShaderTool" type="Node" parent="."]
 script = ExtResource("2_o32pp")
@@ -17,3 +17,8 @@ script = ExtResource("2_o32pp")
 script = ExtResource("3_5yp2k")
 operation_path = "res://src/assets/texture/ui/console/cool_tiny_cube_flash16/"
 resource_save_path = "res://core/resources/animated_texture/cool_tiny_cube.tres"
+
+[node name="JsonTool" type="Node" parent="."]
+script = ExtResource("4_kbthd")
+json_file = null
+metadata/_custom_type_script = "uid://bwqgyhwtyfev8"

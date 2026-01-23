@@ -1,10 +1,11 @@
 #|*******************************************************************
-# script_tool.gd
+# file_tool.gd
 #*******************************************************************
 # This file is part of g_libs.
 # 
 # g_libs is an open-source software library.
 # g_libs is licensed under the MIT license.
+# 
 # https://github.com/gammasynth/g_libs
 #*******************************************************************
 # Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
@@ -21,9 +22,10 @@
 #|*******************************************************************
 
 
+
 @tool
 extends Node
-class_name ScriptTool
+class_name FileTool
 
 @export var search_path: String = "res://"
 @export var search_recursive: bool = true
@@ -72,26 +74,26 @@ func do_update_scripts_to_control_script():
 	var file_paths : Array = []
 	
 	if search_recursive:
-		file_paths = FileTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
+		file_paths = FileUtilTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
 	else:
-		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
+		file_paths = FileUtilTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
 	
-	#print("ScriptTool | files: " + str(file_paths) )
+	#print("FileTool | files: " + str(file_paths) )
 	
 	var script_paths: Array = []
 	for file_path: String in file_paths:
-		var file_name : String = FileTool.get_file_name_from_file_path(file_path, true)
+		var file_name : String = FileUtilTool.get_file_name_from_file_path(file_path, true)
 		if file_name.begins_with(filename_begins_with) and file_name.ends_with(filename_ends_with):
 			script_paths.append(file_path)
 	
-	print("ScriptTool | scripts: " + str(script_paths) )
+	print("FileTool | scripts: " + str(script_paths) )
 	
 	var control_script: Script = load(control_script_path)
 	if not control_script:
-		print("ScriptTool | Error no control script!")
+		print("FileTool | Error no control script!")
 		return
 	var control_source_code: String = control_script.source_code
-	var control_script_file_name: String = FileTool.get_file_name_from_file_path(control_script_path)
+	var control_script_file_name: String = FileUtilTool.get_file_name_from_file_path(control_script_path)
 	var control_class_extends: String = str("extends " + control_script_file_name.substr(filename_begins_with.length()).to_pascal_case())
 	control_class_extends = control_class_extends.replacen("2D", "2D")
 	control_class_extends = control_class_extends.replacen("3D", "3D")
@@ -108,19 +110,19 @@ func do_update_scripts_to_control_script():
 		#control_source_code.replacen(control_class_def, "")
 	
 	for script_path: String in script_paths:
-		var file_name : String = FileTool.get_file_name_from_file_path(script_path)
+		var file_name : String = FileUtilTool.get_file_name_from_file_path(script_path)
 		
 		var class_string_name: String = file_name.to_pascal_case()
 		
 		var class_extends: String = str("extends " + file_name.substr(filename_begins_with.length()).to_pascal_case())
 		class_extends = class_extends.replacen("2D", "2D")
 		class_extends = class_extends.replacen("3D", "3D")
-		print("ScriptTool | class extends: " + class_extends)
+		print("FileTool | class extends: " + class_extends)
 		
 		var class_def: String = str("class_name " + class_string_name)
 		class_def = class_def.replacen("2D", "2D")
 		class_def = class_def.replacen("3D", "3D")
-		print("ScriptTool | class def: " + class_def)
+		print("FileTool | class def: " + class_def)
 		
 		var script: Script = load(script_path)
 		var source_code: String = control_source_code
@@ -136,24 +138,24 @@ func do_update_scripts_to_control_script():
 		script.reload()
 		
 		if ResourceSaver.save(script, script_path):
-			print("ScriptTool | saved script: " + file_name)
+			print("FileTool | saved script: " + file_name)
 	
-	if script_paths.size() > 0: print("ScriptTool | saved scripts!")
+	if script_paths.size() > 0: print("FileTool | saved scripts!")
 
 
 func do_update_files_licensing():
 	var file_paths : Array = []
 	
 	if search_recursive:
-		file_paths = FileTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
+		file_paths = FileUtilTool.search_for_file_paths_recursively(search_path, false, true, include_hidden_folders, blacklist_folder_names, blacklist_file_names)
 	else:
-		file_paths = FileTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
+		file_paths = FileUtilTool.get_all_filepaths_from_directory(search_path, "", true, blacklist_file_names)
 	
-	#print("ScriptTool | files: " + str(file_paths) )
+	#print("FileTool | files: " + str(file_paths) )
 	
 	var paths: Array = []
 	for file_path: String in file_paths:
-		var file_name : String = FileTool.get_file_name_from_file_path(file_path, true)
+		var file_name : String = FileUtilTool.get_file_name_from_file_path(file_path, true)
 		if only_license_files_with_filename_beginning and not file_name.begins_with(filename_begins_with): continue
 		if only_license_files_with_filename_ending and not file_name.ends_with(filename_ends_with): continue
 		if only_license_gd_files and not file_name.ends_with(".gd"): continue
@@ -164,13 +166,13 @@ func do_update_files_licensing():
 				break
 		if approve: paths.append(file_path)
 	
-	print("ScriptTool | paths: " + str(paths) )
+	print("FileTool | paths: " + str(paths) )
 	
 	var license_text:String = "All rights reserved."
 	if license_files:
 		if not FileAccess.file_exists(control_license_path):
-			print(str("ScriptTool | No control license file at path: " + control_license_path))
-			print("ScriptTool | Cancelling action!")
+			print(str("FileTool | No control license file at path: " + control_license_path))
+			print("FileTool | Cancelling action!")
 			return
 		var license_file:FileAccess = FileAccess.open(control_license_path, FileAccess.READ)
 		license_text = license_file.get_as_text()
@@ -188,7 +190,7 @@ func do_update_files_licensing():
 	if header_licensed_files: full_licensing = str(licensed_file_header + "\n" + license_bracket + "\n" + full_licensing)
 	
 	for path: String in paths:
-		var file_name : String = FileTool.get_file_name_from_file_path(path, true)
+		var file_name : String = FileUtilTool.get_file_name_from_file_path(path, true)
 		var this_licensing : String = full_licensing
 		if name_licensed_files: this_licensing = str(file_name + "\n" + license_bracket + "\n" + this_licensing)
 		this_licensing = str(main_license_bracket + "\n" + this_licensing)
@@ -203,8 +205,8 @@ func do_update_files_licensing():
 		
 		var file: FileAccess = FileAccess.open(path, FileAccess.READ_WRITE)
 		if not file:
-			print(str("ScriptTool | Couldn't open file at: " + path))
-			print("ScriptTool | Skipping file!")
+			print(str("FileTool | Couldn't open file at: " + path))
+			print("FileTool | Skipping file!")
 			continue
 		
 		var text: String = file.get_as_text()
@@ -212,29 +214,29 @@ func do_update_files_licensing():
 		if text.containsn(main_license_bracket):
 			
 			var start: int = text.findn(main_license_bracket)
-			print("ScriptTool | found existing license start bracket! @ char: " + str(start))
+			print("FileTool | found existing license start bracket! @ char: " + str(start))
 			
 			var pre_length: int = start + main_license_bracket.length()
 			var remaining_text: String = text.substr(pre_length)
 			var next_bracket: int = remaining_text.findn(main_license_bracket)
 			if next_bracket != -1: 
-				print("ScriptTool | found existing next bracket! @ char: " + str(next_bracket))
+				print("FileTool | found existing next bracket! @ char: " + str(next_bracket))
 				#next_bracket += pre_length
 			else: next_bracket = 0
 			var end: int = pre_length + next_bracket + main_license_bracket.length()
 			var old_license:String = text.substr(start, end - start)
 			text = text.replace(old_license, "")
-			print("ScriptTool | removed previous file licensing!")
+			print("FileTool | removed previous file licensing!")
 		
 		# WARN this commented code removed every newline from scripts currently...
 		#if text.begins_with("\n"):
 			#while text.begins_with("\n"): text = text.replace("\n", "")
-			#print("ScriptTool | removed whitespace newlines at beginning of file...")
+			#print("FileTool | removed whitespace newlines at beginning of file...")
 		
 		if license_files: text = str(this_licensing + text)
 		
 		file.resize(0)# WARN
 		file.store_string(text)
-		print("ScriptTool | saved " + is_licensed_print + " file: " + file_name)
+		print("FileTool | saved " + is_licensed_print + " file: " + file_name)
 	
-	if paths.size() > 0: print("ScriptTool | saved scripts!")
+	if paths.size() > 0: print("FileTool | saved scripts!")
