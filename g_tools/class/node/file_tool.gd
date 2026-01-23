@@ -21,53 +21,70 @@
 # 
 #|*******************************************************************
 
-
-
 @tool
 extends Node
 class_name FileTool
 
+@export_category("Destination Files")
 @export var search_path: String = "res://"
 @export var search_recursive: bool = true
 
+@export_group("Path Filtering")
+@export_subgroup("Filename Begin & End")
 @export var filename_begins_with: String = "database_"
 @export var filename_ends_with: String = ".gd"
+@export_subgroup("")
+
+@export_subgroup("Blacklist Files & Folders")
+@export var blacklist_folder_names: Array[String] = []
+@export var blacklist_file_names: Array[String] = ["LICENSE", "README"]
+@export_subgroup("")
+
+@export var include_hidden_folders: bool = true
+@export_group("")
 
 @export var comment_character: String = "#"
 
-@export var blacklist_folder_names: Array[String] = []
-@export var blacklist_file_names: Array[String] = ["LICENSE", "README"]
-@export var include_hidden_folders: bool = true
 
+@export_category("Batch Script Edit")
 @export var control_script_path: String = "res://lib/g_libs/g_db/class/node/database_node.gd"
 
-@export var update_scripts_to_control_script: bool = false:
-	set(b):
-		update_scripts_to_control_script = b
-		if b:
-			do_update_scripts_to_control_script()
-			await get_tree().create_timer(0.1).timeout
-			update_scripts_to_control_script = false
+#@export var update_scripts_to_control_script: bool = false:
+	#set(b):
+		#update_scripts_to_control_script = b
+		#if b:
+			#do_update_scripts_to_control_script()
+			#await get_tree().create_timer(0.1).timeout
+			#update_scripts_to_control_script = false
+## Modify the destination script files to contain the same code as the [param]
+@export_tool_button("Batch Update Scripts to Control Script") var update_scripts_action: Callable = do_update_scripts_to_control_script
 
+@export_category("Batch File Licensing")
 @export var control_license_path: String = "res://LICENSE.md"
+
+@export_group("File Headers")
 @export_multiline var licensed_file_header:String = "This file is part of an open-source software."
 @export var header_licensed_files: bool = false
 @export var name_licensed_files: bool = false
+
+@export_group("File Filtering")
 @export var only_license_gd_files: bool = false
 @export var licensable_filetypes:Array[String] = [".txt", ".md", ".gd"]
 
 @export var only_license_files_with_filename_beginning: bool = false
 @export var only_license_files_with_filename_ending: bool = false
+@export_group("")
 
 @export var license_files: bool = false
 
-@export var update_licensing: bool = false:
-	set(b):
-		update_licensing = b
-		if b:
-			do_update_files_licensing()
-			await get_tree().create_timer(0.1).timeout
-			update_licensing = false
+#@export var update_licensing: bool = false:
+	#set(b):
+		#update_licensing = b
+		#if b:
+			#do_update_files_licensing()
+			#await get_tree().create_timer(0.1).timeout
+			#update_licensing = false
+@export_tool_button("Batch Update File Licensing") var update_licenses_action: Callable = do_update_files_licensing
 
 
 func do_update_scripts_to_control_script():
@@ -196,12 +213,16 @@ func do_update_files_licensing():
 		this_licensing = str(main_license_bracket + "\n" + this_licensing)
 		var this_licensing_lines:PackedStringArray = this_licensing.split("\n", true, 0)
 		this_licensing = ""
+		
+		var idx:int = 0
 		for line:String in this_licensing_lines:
 			var this_line:String = line
 			if not this_line.begins_with(comment_character): 
 				this_line = str(comment_character + " " + this_line)
-			this_line = str(this_line + "\n")
+			
+			if idx != this_licensing_lines.size() - 1: this_line = str(this_line + "\n")
 			this_licensing = str(this_licensing + this_line)
+			idx += 1
 		
 		var file: FileAccess = FileAccess.open(path, FileAccess.READ_WRITE)
 		if not file:
