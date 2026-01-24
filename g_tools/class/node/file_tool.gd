@@ -214,15 +214,17 @@ func do_update_files_licensing():
 		var this_licensing_lines:PackedStringArray = this_licensing.split("\n", true, 0)
 		this_licensing = ""
 		
-		var idx:int = 0
+		#var idx:int = 0
 		for line:String in this_licensing_lines:
 			var this_line:String = line
 			if not this_line.begins_with(comment_character): 
 				this_line = str(comment_character + " " + this_line)
 			
-			if idx != this_licensing_lines.size() - 1: this_line = str(this_line + "\n")
+			#if idx != this_licensing_lines.size() - 1: this_line = str(this_line + "\n")
+			# ^ possible problem with cutting line from file at top?? ^
+			this_line = str(this_line + "\n")
 			this_licensing = str(this_licensing + this_line)
-			idx += 1
+			#idx += 1
 		
 		var file: FileAccess = FileAccess.open(path, FileAccess.READ_WRITE)
 		if not file:
