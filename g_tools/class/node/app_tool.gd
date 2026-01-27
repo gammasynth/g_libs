@@ -24,9 +24,78 @@
 extends Node
 class_name AppTool
 
+@export_category("App Version")
+@export var current_version : String = ProjectSettings.get_setting("application/config/version")
+@export var new_version : String = current_version
+
+@export_global_dir var updates_info_file_path : String = ""
+@export_multiline var update_description : String = ""
+@export_global_file() var changelog : String = ""
+
+@export_tool_button("Write commit to changelog") var add_commit_action : Callable = add_commit_to_changelog
+
+@export_global_dir var new_changelog_file_path : String = ""
+@export_tool_button("Create new changelog") var create_changelog_action : Callable = create_new_changelog
+
+@export_category("Versions Manifest")
 @export_global_file() var versions_manifest : String = ""
 @export var encryption_key : String = ""
 @export_tool_button("Update Version Manifest") var update_version_action : Callable = update_version_manifest
+
+func create_new_changelog() -> void:
+	var changelog_file = str(File.ends_with_slash(new_changelog_file_path) + "changelog.txt")
+	DirAccess.remove_absolute(changelog_file)
+	
+	var file = FileAccess.open(changelog_file, FileAccess.WRITE_READ)
+	file.store_line(str(ProjectSettings.get_setting("application/config/name") + " | version changelog"))
+	file.store_line("___")
+	file.store_line(" ")
+	
+	print(str("Created new changelog at: " + changelog_file + " !"))
+	new_changelog_file_path = ""
+
+func add_commit_to_changelog() -> void:
+	print("---")
+	print(" ")
+	print("AppTool | Writing update information to version changelog files...")
+	print(" ")
+	
+	var updates_file_path :String = str(File.ends_with_slash(updates_info_file_path) + "version_" + str(new_version) + "_changelog.txt")
+	print(updates_file_path)
+	DirAccess.remove_absolute(updates_file_path)
+	
+	
+	var updates_file = FileAccess.open(updates_file_path, FileAccess.WRITE_READ)
+	write_update_info_to_file(updates_file)
+	print("AppTool | Wrote individual update changelog file: " + updates_file_path.get_file() + " !")
+	print(" ")
+	
+	print(changelog)
+	var file = FileAccess.open(changelog, FileAccess.READ_WRITE)
+	var changelog_string: String = file.get_as_text()
+	var header: String = changelog_string.substr(0, changelog_string.find("___")+4)
+	var body: String = changelog_string.substr(changelog_string.find("___")+4)
+	file.resize(0)
+	file.store_string(header)
+	write_update_info_to_file(file)
+	file.store_string(body)
+	print("AppTool | Added this update info into main changelog file: " + changelog.get_file() + " !")
+	print(" ")
+	
+	ProjectSettings.set_setting("application/config/version", new_version)
+	current_version = ProjectSettings.get_setting("application/config/version")
+	
+	update_description = ""
+	
+	print("AppTool | Finished writing version update changelogs!")
+
+func write_update_info_to_file(file:FileAccess) -> void:
+	file.store_line("---")
+	file.store_line("")
+	file.store_line(str("version " + new_version))
+	file.store_line("")
+	file.store_string(update_description)
+	file.store_line("")
 
 func update_version_manifest() -> void:
 	var data : Dictionary = FileUtilTool.load_dict_file(versions_manifest, encryption_key)

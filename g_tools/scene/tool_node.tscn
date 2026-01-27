@@ -21,9 +21,12 @@ resource_save_path = "res://core/resources/animated_texture/cool_tiny_cube.tres"
 
 [node name="JsonTool" type="Node" parent="."]
 script = ExtResource("4_kbthd")
-json_file = null
 metadata/_custom_type_script = "uid://bwqgyhwtyfev8"
 
 [node name="AppTool" type="Node" parent="."]
 script = ExtResource("5_36dla")
+updates_info_file_path = null
+update_description = null
+changelog = null
+new_changelog_file_path = null
 metadata/_custom_type_script = "uid://cptrdpvkoqdwg"
