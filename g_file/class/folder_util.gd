@@ -56,6 +56,12 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 	
 	folder_path = FileUtil.ends_with_slash(folder_path)
 	
+	## For res:// paths, use export-safe method
+	#if folder_path.begins_with("res://"):
+		##return _get_all_directories_from_directory_res(folder_path, full_path, recursive, blacklist_folder_names)
+		#return _get_all_directories_from_directory_res(folder_path, full_path, blacklist_folder_names)
+	
+	# For user:// and other absolute paths, use DirAccess
 	var dir = DirAccess.open(folder_path)
 	if not dir: return [];
 	# Use DirAccess to list through the Directory's contents as FileName Strings
@@ -88,6 +94,10 @@ static func get_all_directories_from_directory(folder_path:String, full_path:boo
 ## Scan a Directory for files, return an Array of each file's path (or full_path)
 ## A whitelist can be used to only collect files of certain extensions
 static func get_all_filepaths_from_directory(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array=[]) -> Array:
+	# For res:// paths, use export-safe method
+	#if file_path.begins_with("res://"):
+		#return _get_all_filepaths_from_directory_res(file_path, whitelist_extension, full_path, blacklist_file_names)
+	
 	var filepaths: Array[String] = []
 	var dir = DirAccess.open(file_path); if not dir: return [];
 	# Use DirAccess to list through the Directory's contents as FileName Strings
@@ -171,3 +181,71 @@ static func search_for_file_paths_recursively(folder_path:String, as_dictionary:
 			return this_directory_dict
 	else:
 		return all_file_paths
+#endregion
+
+## Export-safe directory listing for res:// paths using ResourceLoader
+## Works in both editor and exported builds
+static func _get_all_directories_from_directory_res(folder_path:String, full_path:bool=false, blacklist_folder_names:Array=[]) -> Array[String]:
+	var directories: Array[String] = []
+	
+	# Normalize the path
+	folder_path = FileUtil.ends_with_slash(folder_path)
+	
+	# Fallback for exported builds: use ResourceLoader to scan available resources
+	# This is less efficient but works in exported games
+	
+	# Create a set of unique directory paths by examining all loadable resources
+	var all_resources: PackedStringArray = ResourceLoader.list_directory(folder_path)
+	
+	for resource_path in all_resources:
+		var path : String = resource_path
+		
+		if blacklist_folder_names.has(resource_path): continue
+		if blacklist_folder_names.has(resource_path.trim_suffix("/")): continue
+		
+		if full_path: path = str(folder_path + resource_path)
+		
+		if blacklist_folder_names.has(resource_path): continue
+		if blacklist_folder_names.has(resource_path.trim_suffix("/")): continue
+		
+		if path.ends_with("/"): directories.append(path)
+	
+	return directories
+
+## Export-safe file listing for res:// paths using ResourceLoader
+## Works in both editor and exported builds
+static func _get_all_filepaths_from_directory_res(file_path:String, whitelist_extension:String="", full_path:bool=false, blacklist_file_names:Array=[]) -> Array:
+	var filepaths: Array[String] = []
+	
+	# Normalize the path
+	file_path = FileUtil.ends_with_slash(file_path)
+	
+	# Fallback for exported builds: use ResourceLoader
+	var all_resources: PackedStringArray = ResourceLoader.list_directory(file_path)
+	
+	for resource_path in all_resources:
+		
+		# Skip if it's in a subdirectory
+		if "/" in resource_path: continue
+		
+		var path : String = resource_path
+		var ext: String = path.get_extension()
+		
+		# Check whitelist extension
+		if not whitelist_extension.is_empty() and ext != whitelist_extension: continue
+		
+		# Check blacklist
+		if blacklist_file_names.has(path): continue
+		if blacklist_file_names.has(path.trim_suffix(ext)): continue
+		
+		if full_path: path = str(file_path + resource_path)
+		
+		# Check blacklist
+		if blacklist_file_names.has(path): continue
+		if blacklist_file_names.has(path.trim_suffix(ext)): continue
+		
+		
+		filepaths.append(resource_path)
+	
+	return filepaths
+	

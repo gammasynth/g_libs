@@ -337,7 +337,13 @@ func handle_groups_collection(folder_path:String, dir_idx:int, parent_group:Regi
 		await collect_unloaded_directory_data(folder_path, dir_idx)
 	if File.is_file(folder_path):
 		var valid_file = File.is_valid_file(folder_path)
-		if File.is_import_info_file(folder_path): valid_file = false
+		
+		# WE used to simply ignore .import files, but godot file management changes over time
+		#if File.is_import_info_file(folder_path): valid_file = false
+		
+		if folder_path.ends_with(".remap"): folder_path = folder_path.replace(".remap", "")
+		
+		
 		if valid_file:
 			if unloaded_data.has(dir_idx):
 				unloaded_data[dir_idx].append(folder_path)
