@@ -39,8 +39,16 @@ class_name AppTool
 
 @export_category("Versions Manifest")
 @export_global_file() var versions_manifest : String = ""
+@export_global_file() var versions_manifest_gitpush : String = ""
 @export var encryption_key : String = ""
 @export_tool_button("Update Version Manifest") var update_version_action : Callable = update_version_manifest
+
+@export_category("Update Application")
+
+## Writes commit & changelogs, updates ProjectSettings version to [member new_version], updates  [member versions_manifest]. [br] [br]
+## Equivalent to pressing "Write commit to changelog" and then "Update Version Manifest", at the same time. [br] [br]
+## You should make sure to update/commit/push your repo and/or res://lib/ repos prior to doing this. (Then you can commit again after to push the changelogs.)
+@export_tool_button("Update App") var update_app_action : Callable = update_app
 
 func create_new_changelog() -> void:
 	var changelog_file = str(File.ends_with_slash(new_changelog_file_path) + "changelog.txt")
@@ -117,5 +125,18 @@ func update_version_manifest() -> void:
 	var err: Error = FileUtilTool.save_dict_file(data, versions_manifest, encryption_key)
 	if err == OK:
 		print(str("AppTool | Saved updated version manifest data at " + str(versions_manifest) + " !"))
+		if versions_manifest_gitpush is String and not versions_manifest_gitpush.is_empty():
+			# TODO implement linux shell scripts
+			if versions_manifest_gitpush.ends_with(".bat"):
+				var output: Array = []
+				var exit_code: int = OS.execute(versions_manifest_gitpush, [str(app_name + " update version " + version)], output, true, true)
+				if exit_code == -1: print("AppTool | Error: versions_manifest_gitpush failed to execute!")
+				print("AppTool | versions_manifest_gitpush output: ")
+				print(output)
 	else:
 		print(str("AppTool | Failed to save file! Err == " + str(err) + " " + error_string(err)))
+
+
+func update_app() -> void:
+	add_commit_to_changelog()
+	update_version_manifest()
