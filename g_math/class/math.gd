@@ -25,5 +25,8 @@
 
 class_name Math
 
-static func coin(sides:int=1) -> bool:
-	return randi_range(clamp(0,sides, sides),sides) == 0
+static var rarity: float:
+	get:
+		return randf_range(0.0, 1.0)
+
+static func coin(sides:int=1) -> bool: return randi_range(clamp(0,sides, sides),sides) == 0

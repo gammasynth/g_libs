@@ -42,6 +42,9 @@ class_name RefInstance
 static var origin_instance: RefInstance = null
 ## The first [RefInstance] instance to be initialized in a runtime becomes the [member origin_instance] and will enable this boolean for itself, and all other instances will have this boolean disabled.
 var is_origin_instance: bool = false
+## After the [method _do_init] runs, [member is_initialized] will be set to true after [method _initialized] has been called. [br]
+## During the [method _do_init] method, if [member is_initialized] is already true, [method _initialized] will not be called. [br]
+var is_initialized: bool = false
 
 ## The signal [signal started] is emitted when the method [method start] is called, it is emitted prior to the execution of an overridden [method _start] method.
 signal started
@@ -122,13 +125,20 @@ func _get_parent_instance() -> RefInstance: return parent_instance
 
 
 ## The [method _init] can be overridden in a new class that extends from [RefInstance], the new overidding function can change the function's parameters/argumentation, and it is reccommended to use the method super(_name, _key) to call this origin initializer function.
-func _init(_name:String="OBJ", _key:Variant=_name) -> void:
+func _init(_name:String="OBJ", _key:Variant=_name) -> void: _do_init(_name, _key)
+
+func _do_init(_name:String="OBJ", _key:Variant=_name) -> void:
 	if origin_instance == null: 
 		origin_instance = self
 		is_origin_instance = true
 	
 	name = _name
 	key = _key
+	
+	if not is_initialized: _initialized()
+	is_initialized = true
+
+func _initialized() -> void: return
 
 #region Instance Tick Operation
 ## The [method start] can be used as an entry point for a class's intended operation whether one-pass or repeating functionality. [br]
