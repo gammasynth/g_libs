@@ -23,6 +23,7 @@
 
 
 
+
 extends Node2D
 
 ## DatabaseNode is a wrapper class for a Node to use a Database

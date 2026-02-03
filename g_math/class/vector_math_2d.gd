@@ -23,6 +23,7 @@
 
 
 
+
 class_name VectorMath2D
 # A Static Helper class for Vector2 and Vector2i management.
 

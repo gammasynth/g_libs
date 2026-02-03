@@ -23,6 +23,7 @@
 
 
 
+
 extends FileConsole
 
 ## The ExecutiveConsole was made for the OmniConsole extension of it. See https://gammasynth.com/omni

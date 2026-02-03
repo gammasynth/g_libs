@@ -23,6 +23,7 @@
 
 
 
+
 @tool
 extends RichTextEffect
 class_name RichTextGhost

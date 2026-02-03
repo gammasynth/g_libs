@@ -23,6 +23,7 @@
 
 
 
+
 extends RefCounted
 
 ## [RefInstance] is a debuggable, nameable, keyable, and operatable [RefCounted] Object, with the ability to [method chat]/[method warn]/[method check] for logging/text-output, and [method start] and [method tick] for ordered operations.

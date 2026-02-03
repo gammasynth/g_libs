@@ -23,6 +23,7 @@
 
 
 
+
 class_name LoadTracker
 
 signal work_event(new_work_text:String, new_work_desc:String)

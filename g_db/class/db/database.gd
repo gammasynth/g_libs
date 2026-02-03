@@ -23,6 +23,7 @@
 
 
 
+
 extends Pool
 ## Database is a simple Object class that is a wrapper for a Dictionary.
 ## 

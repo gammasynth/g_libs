@@ -23,6 +23,7 @@
 
 
 
+
 extends Database
 
 class_name RegistryEntry

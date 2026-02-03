@@ -23,6 +23,7 @@
 
 
 
+
 extends Database
 ## The Console was made for the OmniConsole extension of it. See https://gammasynth.com/omni
 ## A console can optionally use a line_edit as a GUI input, and optionally use a text_edit or rich_label as a GUI output.

@@ -23,6 +23,7 @@
 
 
 
+
 extends Window
 class_name DebugDatabaseWindow
 

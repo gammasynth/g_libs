@@ -23,6 +23,7 @@
 
 
 
+
 class_name VectorMath3D
 # A Static Helper class for Vector3 and Vector3i management.
 const manhattan_dirs: Array[Vector3] = [

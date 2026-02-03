@@ -23,6 +23,7 @@
 
 
 
+
 extends Database
 ## The FileBrowser was made for application called Omni. See https://gammasynth.com/omni
 ## FileBrowser is meant to be used in tandem with an ExecutiveConsole.s

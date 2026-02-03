@@ -23,6 +23,7 @@
 
 
 
+
 extends RegistryStack
 
 ## Registry can be used to dynamically load files at runtime, and keep references to files it has loaded.

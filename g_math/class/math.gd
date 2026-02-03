@@ -23,6 +23,7 @@
 
 
 
+
 class_name Math
 
 static var rarity: float:

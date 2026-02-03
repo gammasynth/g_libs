@@ -23,6 +23,7 @@
 
 
 
+
 extends RefCounted
 class_name FileItem
 

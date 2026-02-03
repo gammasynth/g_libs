@@ -23,6 +23,7 @@
 
 
 
+
 ## File is a Static Object Class to streamline interactions with files, folders, and paths.
 ## See [FileObjectUtil], and [FileUtil], and [FolderUtil].
 class_name File

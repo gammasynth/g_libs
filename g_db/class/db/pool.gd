@@ -23,6 +23,7 @@
 
 
 
+
 extends RefData
 ## Pool is currently built on top of [RefData] as a means of ease when recursing many [RefData]s within each other on an arbitrary keying scheme.
 ## @experimental

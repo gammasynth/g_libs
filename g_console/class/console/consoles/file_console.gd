@@ -23,6 +23,7 @@
 
 
 
+
 extends Console
 ## The FileConsole was made for the OmniConsole extension of it. See https://gammasynth.com/omni
 ## FileConsole is a console that tracks a set directory path, it can change directory path, but not execute commands.
