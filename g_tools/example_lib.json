@@ -1,0 +1,27 @@
+{ 
+	"lib" : 
+		{
+			"name" : "example",
+			"type" : "unknown",
+
+			"date_created" : "jan-1-2000",
+			"source" : "",
+			"origin" : "",
+
+			"dependencies" : [],
+
+			"owner" : "Public",
+			"website" : "",
+			"copyright" : "",
+			"license" : "All Rights Reserved",
+
+			"is_sublibrary" : false,
+			"useable_zipped" : false,
+
+			"executable_path" : "",
+			"add_to_user_environment_path" : false,
+			"add_to_global_environment_path" : false,
+
+			"post_install_executable_path" : ""
+		}
+}

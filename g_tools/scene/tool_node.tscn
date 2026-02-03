@@ -1,32 +1,38 @@
-[gd_scene load_steps=6 format=3 uid="uid://bi888t1r21bnb"]
+[gd_scene format=3 uid="uid://bi888t1r21bnb"]
 
 [ext_resource type="Script" uid="uid://bisb2u68xujde" path="res://lib/g_libs/g_tools/class/node/file_tool.gd" id="1_jrw37"]
 [ext_resource type="Script" uid="uid://ccsjans7h6adl" path="res://lib/g_libs/g_tools/class/node/shader_tool.gd" id="2_o32pp"]
 [ext_resource type="Script" uid="uid://cblsx5pf8ukcu" path="res://lib/g_libs/g_tools/class/node/resource_tool.gd" id="3_5yp2k"]
+[ext_resource type="Script" uid="uid://m57i8y28k4v7" path="res://lib/g_libs/g_tools/class/node/time_tool.gd" id="4_0wq2n"]
 [ext_resource type="Script" uid="uid://bwqgyhwtyfev8" path="res://lib/g_libs/g_tools/class/node/json_tool.gd" id="4_kbthd"]
 [ext_resource type="Script" uid="uid://cptrdpvkoqdwg" path="res://lib/g_libs/g_tools/class/node/app_tool.gd" id="5_36dla"]
 
-[node name="ToolNode" type="Node"]
+[node name="ToolNode" type="Node" unique_id=675606084]
 
-[node name="FileTool" type="Node" parent="."]
+[node name="FileTool" type="Node" parent="." unique_id=682686430]
 script = ExtResource("1_jrw37")
 
-[node name="ShaderTool" type="Node" parent="."]
+[node name="ShaderTool" type="Node" parent="." unique_id=385882112]
 script = ExtResource("2_o32pp")
 
-[node name="ResourceTool" type="Node" parent="."]
+[node name="ResourceTool" type="Node" parent="." unique_id=1440164859]
 script = ExtResource("3_5yp2k")
 operation_path = "res://src/assets/texture/ui/console/cool_tiny_cube_flash16/"
 resource_save_path = "res://core/resources/animated_texture/cool_tiny_cube.tres"
 
-[node name="JsonTool" type="Node" parent="."]
+[node name="TimeTool" type="Node" parent="." unique_id=1619197453]
+script = ExtResource("4_0wq2n")
+date_time_stamp = "feb-3-2026-3 pm-34-44 s-Central Standard Time"
+metadata/_custom_type_script = "uid://m57i8y28k4v7"
+
+[node name="JsonTool" type="Node" parent="." unique_id=1412259197]
 script = ExtResource("4_kbthd")
 metadata/_custom_type_script = "uid://bwqgyhwtyfev8"
 
-[node name="AppTool" type="Node" parent="."]
+[node name="AppTool" type="Node" parent="." unique_id=577520189]
 script = ExtResource("5_36dla")
-updates_info_file_path = null
-update_description = null
-changelog = null
-new_changelog_file_path = null
+project_root = "C:/Files/github/gamma_work/opul/opul_godot/"
+godot_project_root = "C:/Files/github/gamma_work/opul/opul_godot/"
+current_version = "0.0.2"
+new_version = "0.0.2"
 metadata/_custom_type_script = "uid://cptrdpvkoqdwg"

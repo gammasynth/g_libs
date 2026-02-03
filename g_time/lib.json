@@ -1,0 +1,27 @@
+{ 
+	"lib" : 
+		{
+			"name" : "g_time",
+			"type" : "godot",
+
+			"date_created" : "feb-3-2026",
+			"source" : "",
+			"origin" : "",
+
+			"dependencies" : ["g_libs"],
+
+			"owner" : "Gammasynth",
+			"website" : "https://gammasynth.com",
+			"copyright" : "Copyright (c) Gammasynth 2026 AD / 1447 AH",
+			"license" : "MIT",
+
+			"is_sublibrary" : true,
+			"useable_zipped" : false,
+
+			"executable_path" : "",
+			"add_to_user_environment_path" : false,
+			"add_to_global_environment_path" : false,
+
+			"post_install_executable_path" : ""
+		}
+}

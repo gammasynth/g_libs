@@ -25,8 +25,17 @@ extends Node
 class_name AppTool
 
 @export_category("App Version")
+enum StatusTypes {alpha, beta, release}
+enum CodeTypes {library, application}
+
+@export var version_status: StatusTypes = StatusTypes.alpha
+@export var project_type: CodeTypes = CodeTypes.application
+@export_global_dir var project_root: String = ProjectSettings.globalize_path("res://")
+@export_global_dir var godot_project_root: String = ProjectSettings.globalize_path("res://")
+
 @export var current_version : String = ProjectSettings.get_setting("application/config/version")
 @export var new_version : String = current_version
+
 
 @export_global_dir var updates_info_file_path : String = ""
 @export_multiline var update_description : String = ""
