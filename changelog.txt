@@ -2,6 +2,12 @@ g_libs | version changelog
 ___
 ---
 
+version 1.1.6 release
+
+- updated lib_g_libs to scene/dev/ instead of src/scene/dev
+
+---
+
 version 1.1.5 release
 
 - AppTool update JSON timestamp can use json_tool_node/time_tool_node
