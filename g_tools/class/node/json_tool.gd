@@ -53,6 +53,7 @@ var current_date_time_stamp:String = "jan-1-2000":
 		if lib_creation: return current_date_time_stamp
 		return date_lib_created
 
+@export var lib_build: String = "alpha"
 @export var lib_version: String = "0.0.1"
 @export var lib_last_update: String = current_date_time_stamp
 

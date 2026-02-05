@@ -1,0 +1,9 @@
+---
+
+version 1.1.0 release
+
+- added changelogs
+
+- added src/scene/dev/lib_g_libs
+
+- appended version_status to changelog new_version strings

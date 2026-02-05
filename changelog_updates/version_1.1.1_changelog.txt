@@ -1,0 +1,13 @@
+---
+
+version 1.1.1 release
+
+- added startup_project method in AppTool
+- added Startup New Project button in AppTool
+
+- implemented local vs global root directory favoritism in AppTool
+- implemented local vs global changlog updates directory path favoritism in AppTool
+- implemented local vs global changlog path favoritism in AppTool
+
+- implemented project_is_godot_editor
+- update_version_manifest implements project_is_godot_editor
