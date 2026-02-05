@@ -145,10 +145,15 @@ func startup_project() -> void:
 			if not uses_local_updates_path && updates_info_file_path.is_empty(): 
 					print("AppTool | There is no updates_info_file_path! Generating new changelog updates directory...")
 					var changelogs_dir:String = str(get_project_root() + "changelog_updates/")
-					updates_info_file_path = changelogs_dir
-					print(str("AppTool | Generated updates_info_file_path changelogs updates directory at: " + updates_info_file_path))
+					if changelogs_dir.begins_with("res://"): 
+						local_updates_info_file_path = changelogs_dir
+						uses_local_updates_path = true
+						print(str("AppTool | Generated local_updates_info_file_path changelogs updates directory at: " + local_updates_info_file_path))
+					else:
+						updates_info_file_path = changelogs_dir
+						print(str("AppTool | Generated updates_info_file_path changelogs updates directory at: " + updates_info_file_path))
 		else:
-			print("AppTool | This project already has a updates_info_file_path! Continuing...")
+			print("AppTool | This project already has a updates_info_file_path set! Continuing...")
 		
 		print("AppTool | Validating changelog updates directory...")
 		if uses_local_updates_path: DirAccess.make_dir_recursive_absolute(local_updates_info_file_path)
