@@ -1,0 +1,6 @@
+---
+
+version 1.1.2 release
+
+- AppTool add_commit_to_changelog updates lib/version .json files
+- AppTool can use json_tool_node instead of adding a new JsonTool node (for customizing exports)

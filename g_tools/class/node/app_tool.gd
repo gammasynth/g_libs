@@ -28,6 +28,7 @@ class_name AppTool
 enum StatusTypes {alpha, beta, release}
 enum CodeTypes {none, library, application}
 
+@export var json_tool_node : JsonTool
 @export var project_is_godot_editor : bool = false
 @export_dir var local_project_root: String = "res://"
 @export_global_dir var project_root: String = ProjectSettings.globalize_path("res://")
@@ -69,7 +70,7 @@ enum CodeTypes {none, library, application}
 
 @export_category("Update Application")
 
-## Writes commit & changelogs, updates ProjectSettings version to [member new_version], updates  [member versions_manifest]. [br] [br]
+## Writes commit & changelogs & any JSON (lib/version) Information, updates ProjectSettings version to [member new_version] if [member project_is_godot_editor], updates  [member versions_manifest]. [br] [br]
 ## Equivalent to pressing "Write commit to changelog" and then "Update Version Manifest", at the same time. [br] [br]
 ## You should make sure to update/commit/push your repo and/or res://lib/ repos prior to doing this. (Then you can commit again after to push the changelogs.)
 @export_tool_button("Update App") var update_app_action : Callable = update_app
@@ -113,9 +114,11 @@ func startup_project() -> void:
 		if not FileAccess.file_exists(json_info):
 			print("AppTool | There is no JSON version.json information file! Creating a new one...")
 			
-			print("AppTool | Adding new JsonTool node...")
-			var json_tool:JsonTool = JsonTool.new()
-			await Make.child(json_tool, self)
+			var json_tool:JsonTool = json_tool_node
+			if not json_tool_node:
+				print("AppTool | Adding new JsonTool node...")
+				json_tool = JsonTool.new()
+				await Make.child(json_tool, self)
 			
 			print("AppTool | Added new JsonTool node!")
 			print("AppTool | Configuring JsonTool node...")
@@ -180,9 +183,11 @@ func startup_project() -> void:
 		if not FileAccess.file_exists(local_json_info):
 			print("AppTool | There is no JSON lib.json information file! Creating a new one..")
 			
-			print("AppTool | Adding new JsonTool node...")
-			var json_tool:JsonTool = JsonTool.new()
-			await Make.child(json_tool, self)
+			var json_tool:JsonTool = json_tool_node
+			if not json_tool_node:
+				print("AppTool | Adding new JsonTool node...")
+				json_tool = JsonTool.new()
+				await Make.child(json_tool, self)
 			
 			print("AppTool | Added new JsonTool node!")
 			print("AppTool | Configuring JsonTool node...")
@@ -334,7 +339,23 @@ func add_commit_to_changelog() -> void:
 		ProjectSettings.set_setting("application/config/version", new_version)
 		current_version = ProjectSettings.get_setting("application/config/version")
 	
+	if not local_json_info.is_empty() or not json_info.is_empty():
+		print("AppTool | Updating JSON (lib/version) information...")
+		var json_path:String = json_info
+		if json_path.is_empty(): json_path = local_json_info
+		if FileAccess.file_exists(json_path):
+			print("AppTool | Found JSON information file for project!")
+			print(str("AppTool | JSON Information filepath: " + json_path))
+			print("AppTool | Updating JSON (lib/version) information...")
+			var dict:Dictionary = File.load_dict_file(json_path)
+			dict.set("version", new_version)
+			dict.set("build", StatusTypes.keys().get(version_status))
+			dict.set("latest_update", Timestamp.stamp())
+			print("AppTool | Updated version/build/latest_update in JSON Information File!")
+	
+	
 	update_description = ""
+	current_version = new_version
 	
 	print("AppTool | Finished writing version update changelogs!")
 
@@ -386,3 +407,4 @@ func update_version_manifest() -> void:
 func update_app() -> void:
 	add_commit_to_changelog()
 	update_version_manifest()
+	print("AppTool | Update finished! Use Git in the root project folder for online version control.")
