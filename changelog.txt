@@ -2,6 +2,11 @@ g_libs | version changelog
 ___
 ---
 
+version 1.1.5 release
+
+- AppTool update JSON timestamp can use json_tool_node/time_tool_node
+---
+
 version 1.1.4 release
 
 - fixed not saving JSON lib/version on commit update

@@ -359,7 +359,8 @@ func add_commit_to_changelog() -> void:
 			
 			json_dict.set("version", new_version)
 			json_dict.set("build", StatusTypes.keys().get(version_status))
-			json_dict.set("latest_update", Timestamp.stamp())
+			if json_tool_node: json_dict.set("latest_update", json_tool_node.current_date_time_stamp)
+			else: json_dict.set("latest_update", Timestamp.stamp())
 			
 			if project_type == CodeTypes.library:
 				dict.set("lib", json_dict)
