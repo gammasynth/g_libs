@@ -1,28 +1,23 @@
-{ 
-	"lib" : 
-		{
-			"name" : "g_libs",
-			"type" : "godot",
-			"version" : "1.0.1",
-
-			"date_created" : "jan-28-2025",
-			"source" : "https://github.com/gammasynth/g_libs",
-			"origin" : "https://github.com/gammasynth/g_libs/archive/refs/heads/main.zip",
-
-			"dependencies" : "",
-
-			"owner" : "Gammasynth",
-			"website" : "https://gammasynth.com",
-			"copyright" : "Copyright (c) Gammasynth 2025 AD / 1447 AH",
-			"license" : "MIT",
-
-			"is_sublibrary" : false,
-			"useable_zipped" : false,
-
-			"executable_path" : "",
-			"add_to_user_environment_path" : false,
-			"add_to_global_environment_path" : false,
-
-			"post_install_executable_path" : ""
-		}
+{
+    "lib": {
+        "name": "g_libs",
+        "type": "godot",
+        "version": "1.1.4",
+        "date_created": "jan-28-2025",
+        "source": "https://github.com/gammasynth/g_libs",
+        "origin": "https://github.com/gammasynth/g_libs/archive/refs/heads/main.zip",
+        "dependencies": "",
+        "owner": "Gammasynth",
+        "website": "https://gammasynth.com",
+        "copyright": "Copyright (c) Gammasynth 2025 AD / 1447 AH",
+        "license": "MIT",
+        "is_sublibrary": false,
+        "useable_zipped": false,
+        "executable_path": "",
+        "add_to_user_environment_path": false,
+        "add_to_global_environment_path": false,
+        "post_install_executable_path": "",
+        "build": "release",
+        "latest_update": "feb-5-2026-11pm-20-32"
+    }
 }

@@ -1,0 +1,5 @@
+---
+
+version 1.1.4 release
+
+- fixed not saving JSON lib/version on commit update

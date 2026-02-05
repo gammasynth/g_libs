@@ -353,10 +353,22 @@ func add_commit_to_changelog() -> void:
 			print(str("AppTool | JSON Information filepath: " + json_path))
 			print("AppTool | Updating JSON (lib/version) information...")
 			var dict:Dictionary = File.load_dict_file(json_path)
-			dict.set("version", new_version)
-			dict.set("build", StatusTypes.keys().get(version_status))
-			dict.set("latest_update", Timestamp.stamp())
-			print("AppTool | Updated version/build/latest_update in JSON Information File!")
+			var json_dict: Dictionary = dict
+			if project_type == CodeTypes.library:
+				if dict.has("lib"): json_dict = dict.get("lib")
+			
+			json_dict.set("version", new_version)
+			json_dict.set("build", StatusTypes.keys().get(version_status))
+			json_dict.set("latest_update", Timestamp.stamp())
+			
+			if project_type == CodeTypes.library:
+				dict.set("lib", json_dict)
+			
+			var err:Error = File.save_dict_file(dict, json_path)
+			if err == OK: print("AppTool | Updated version/build/latest_update in JSON Information File!")
+			else: 
+				print("AppTool | Error saving JSON Information File!")
+				print(str("AppTool | File | Error: " + error_string(err)))
 	
 	
 	update_description = ""
