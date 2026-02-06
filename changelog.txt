@@ -2,6 +2,12 @@ g_libs | version changelog
 ___
 ---
 
+version 1.1.8 release
+feb-6-2026-2pm-12-18s-cst
+
+- AppTool's "Startup New Project" Button enables started_project when done
+---
+
 version 1.1.7 release
 feb-5-2026-6pm-35-51s-cst
 

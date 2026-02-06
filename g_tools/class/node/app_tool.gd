@@ -242,6 +242,7 @@ func startup_project() -> void:
 		print("AppTool | This project already has a changelog file!")
 	
 	print("AppTool | Finished Project setup!")
+	started_project = true
 	print(" ")
 
 func get_project_root() -> String:
