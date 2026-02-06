@@ -381,6 +381,7 @@ func write_update_info_to_file(file:FileAccess) -> void:
 	file.store_line("---")
 	file.store_line("")
 	file.store_line(str("version " + new_version + " " + StatusTypes.keys().get(version_status)))
+	file.store_line(json_tool_node.current_date_time_stamp)
 	file.store_line("")
 	file.store_string(update_description)
 	file.store_line("")
