@@ -50,6 +50,13 @@ static func int_as_vector2i(n:int) -> Vector2i: return Vector2i(n,n);
 static func floor_vec2(x:Variant, y:Variant) -> Vector2: return Vector2i(floor(float(x)),floor(float(y)));
 static func floor_vec2i(x:Variant, y:Variant) -> Vector2i: return Vector2i(floor(float(x)),floor(float(y)));
 
+static func in_bounds(pos:Vector2, size:Vector2) -> bool:
+	if pos.x > size.x: return false
+	if pos.y > size.y: return false
+	if pos.x < 0.0: return false
+	if pos.y < 0.0: return false
+	return true
+
 static func distance_vec(vec2a:Vector2i, vec2b:Vector2i) -> Vector2i: return vec2a - vec2b;
 
 static func manhattan_direction_to(point_a:Vector2, point_b:Vector2, prefer_vertical:bool=false):
