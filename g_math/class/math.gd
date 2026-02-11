@@ -30,11 +30,13 @@ static var rarity: float:
 	get:
 		return randf_range(0.0, 1.0)
 
+static func r(to:int=randi()) -> int: return randi() % to
+
 ## Range [method randi_range]; "Return random int between [param from] and [param to]".
-static func r(from:int, to:int) -> int: return randi_range(from, to)
+static func rr(from:int, to:int) -> int: return randi_range(from, to)
 
 ## Range [method randf_range]; "Return random float between [param from] and [param to]".
-static func rf(from:float, to:float) -> float: return randf_range(from, to)
+static func rfr(from:float, to:float) -> float: return randf_range(from, to)
 
 ## range [method randi_range] from 0 to sides (max), returns true if zero. -1 is always true. [br]
 ## Larger [param sides] values will return false more commonly.

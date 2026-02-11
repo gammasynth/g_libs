@@ -1,0 +1,6 @@
+---
+
+version 1.2.2 release
+feb-11-2026-1pm-50-45s-cst
+
+- added Math.r and Math.fr which are not the old methods which had the same names (rr, rfr)

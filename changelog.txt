@@ -2,6 +2,21 @@ g_libs | version changelog
 ___
 ---
 
+version 1.2.2 release
+feb-11-2026-1pm-50-45s-cst
+
+- added Math.r and Math.fr which are not the old methods which had the same names (rr, rfr)
+---
+
+version 1.2.1 release
+feb-11-2026-1pm-39-55s-cst
+
+g_libs Minor Update 2 
+g_libs/g_math
+Math.r renamed to Math.rr
+Math.rf renamed to Math.rfr
+---
+
 version 1.1.9 release
 feb-10-2026-12pm-2-46s-cst
 

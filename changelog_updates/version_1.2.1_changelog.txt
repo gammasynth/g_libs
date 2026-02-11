@@ -1,0 +1,9 @@
+---
+
+version 1.2.1 release
+feb-11-2026-1pm-39-55s-cst
+
+g_libs Minor Update 2 
+g_libs/g_math
+Math.r renamed to Math.rr
+Math.rf renamed to Math.rfr
