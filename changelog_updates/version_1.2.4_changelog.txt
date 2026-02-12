@@ -1,0 +1,9 @@
+---
+
+version 1.2.4 release
+feb-11-2026-5pm-19-14s-cst
+
+- added LetterTypes, Consonants, and Vowels enums to English class
+- added ConsonantsCapitalized, ConsonantsLowercase, VowelsCapitalized, VowelsLowercase constants to English class
+- added type and allow_special_vowels arguments to English.letter method and match case
+- implemented LetterTypes.Consonant and LetterTypes.Vowel for match case in English.letter static method

@@ -1,0 +1,10 @@
+---
+
+version 1.2.5 release
+feb-11-2026-5pm-26-29s-cst
+
+
+- added NonSpecialVowels, SpecialVowels, and SilentLetters enums to English class
+- added NonSpecialVowelsCapitalized, NonSpecialVowelsLowercase, SpecialVowelsCapitalized, SpecialVowelsLowercase, SilentLettersCapitalized, and SilentLettersLowercase constants to English class
+- implemented allow_special_vowels in English.letter static method
+- implemented LetterTypes.SpecialVowel and LetterTypes.Silent in match case in English.letter static method

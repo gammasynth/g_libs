@@ -1,0 +1,6 @@
+---
+
+version 1.2.6 release
+feb-11-2026-7pm-8-59s-cst
+
+- fixed English.letter static method index parameter from Letters to int type

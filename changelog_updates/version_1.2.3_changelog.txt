@@ -1,0 +1,11 @@
+---
+
+version 1.2.3 release
+feb-11-2026-3pm-43-31s-cst
+
+- moved g_libs/g_make/class/format/text.gd to g_libs/g_make/class/format/text/text.gd
+
+- added English class to g_libs/g_make
+- added Letters enum to class English class
+- added LettersCaptialized and LettersLowercase to English class
+- added static letter method English

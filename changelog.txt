@@ -2,6 +2,48 @@ g_libs | version changelog
 ___
 ---
 
+version 1.2.7 release
+feb-11-2026-8pm-54-33s-cst
+
+Text.color can take in either Text.COLORS, int, or Color types for with_color parameter
+---
+
+version 1.2.6 release
+feb-11-2026-7pm-8-59s-cst
+
+- fixed English.letter static method index parameter from Letters to int type
+---
+
+version 1.2.5 release
+feb-11-2026-5pm-26-29s-cst
+
+
+- added NonSpecialVowels, SpecialVowels, and SilentLetters enums to English class
+- added NonSpecialVowelsCapitalized, NonSpecialVowelsLowercase, SpecialVowelsCapitalized, SpecialVowelsLowercase, SilentLettersCapitalized, and SilentLettersLowercase constants to English class
+- implemented allow_special_vowels in English.letter static method
+- implemented LetterTypes.SpecialVowel and LetterTypes.Silent in match case in English.letter static method
+---
+
+version 1.2.4 release
+feb-11-2026-5pm-19-14s-cst
+
+- added LetterTypes, Consonants, and Vowels enums to English class
+- added ConsonantsCapitalized, ConsonantsLowercase, VowelsCapitalized, VowelsLowercase constants to English class
+- added type and allow_special_vowels arguments to English.letter method and match case
+- implemented LetterTypes.Consonant and LetterTypes.Vowel for match case in English.letter static method
+---
+
+version 1.2.3 release
+feb-11-2026-3pm-43-31s-cst
+
+- moved g_libs/g_make/class/format/text.gd to g_libs/g_make/class/format/text/text.gd
+
+- added English class to g_libs/g_make
+- added Letters enum to class English class
+- added LettersCaptialized and LettersLowercase to English class
+- added static letter method English
+---
+
 version 1.2.2 release
 feb-11-2026-1pm-50-45s-cst
 

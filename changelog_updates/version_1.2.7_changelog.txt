@@ -1,0 +1,6 @@
+---
+
+version 1.2.7 release
+feb-11-2026-8pm-54-33s-cst
+
+Text.color can take in either Text.COLORS, int, or Color types for with_color parameter

@@ -20,7 +20,6 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
-
 class_name Text
 
 ## Types of cases related to the capitalization of letter characters.
@@ -76,12 +75,16 @@ static func get_case_separator(case:StringCases) -> String:
 		StringCases.Custom: separator = custom_separator
 	return separator
 
-## Returns the given [param text] argument as String with the given [param with_color] wrapped as bbcode. 
+## Returns the given [param text] argument as String with the given [param with_color] wrapped as bbcode. [br] [br]
+## [param with_color] can be either a Color or [member COLORS]. [br][br]
 ## Optionally call [method center] on the [param text] by enabling the [param centered] argument. [br][br]
 ## For quickly coloring (or not) rich text; in either [method print_rich] or in [class RichTextLabel]s that have [member RichTextLabel.bbcode_enabled] set to true.
-static func color(text:String, with_color:COLORS, centered:bool=false, do:bool=true) -> String:
+static func color(text:String, with_color:Variant, centered:bool=false, do:bool=true) -> String:
 	if not do: return text
-	var clr = COLOR_NAMES[with_color]
+	var clr = with_color
+	if with_color is COLORS: clr = COLOR_NAMES[with_color as int]
+	if with_color is int and int(with_color) < COLORS.size(): clr = COLOR_NAMES[with_color]
+	if with_color is Color: clr = with_color.to_html()
 	text = str("[color=" + clr + "]" + text + "[/color]")
 	if centered: return center(text)
 	return text
