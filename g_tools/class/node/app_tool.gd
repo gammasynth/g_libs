@@ -90,10 +90,16 @@ func startup_project() -> void:
 		print(" ")
 		local_json_info = ""
 		if project_is_godot_editor: 
-			print("AppTool | project_is_godot_editor detected, asking ProjectSettings for application name...")
-			project_name = ProjectSettings.get_setting("application/config/name")
-			print(str("AppTool | Godot Project name is " + project_name) + ", applied to project_name!")
-			print(" ")
+			if project_name.is_empty():
+				print("AppTool | project_is_godot_editor detected, asking ProjectSettings for application name...")
+				project_name = ProjectSettings.get_setting("application/config/name")
+				print(str("AppTool | Godot Project name is " + project_name) + ", applied to project_name!")
+				print(" ")
+			else:
+				print("AppTool | project_is_godot_editor detected, setting ProjectSettings application name...")
+				ProjectSettings.set_setting("application/config/name", project_name)
+				print(str("AppTool | Set Godot Project name to " + project_name) + " in ProjectSettings!")
+				print(" ")
 		
 		var root:String = get_project_root()
 		if root.is_empty():

@@ -1,0 +1,6 @@
+---
+
+version 1.2.9 release
+feb-19-2026-11am-34-55s-cst
+
+- AppTool startup_project() function, if project_is_godot_editor, will apply project_name to ProjectSettings/application/config/name, if project_name is not is_empty(), else the inverse will occur. (project_name will be set to what ProjectSettings/application/config/name is)
