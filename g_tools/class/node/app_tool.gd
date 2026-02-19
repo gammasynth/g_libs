@@ -126,6 +126,7 @@ func startup_project() -> void:
 			json_tool.app_build = StatusTypes.keys().get(version_status)
 			json_tool.app_dependencies = dependencies
 			json_tool.app_version = new_version
+			json_tool.new_file_path_directory = File.ends_with_slash(json_info.get_base_dir())
 			json_tool.new_file_path = json_info
 			
 			print("AppTool | Generating new JSON version.json information file...")
@@ -201,6 +202,7 @@ func startup_project() -> void:
 			json_tool.lib_build = StatusTypes.keys().get(version_status)
 			json_tool.lib_dependencies = dependencies
 			json_tool.lib_version = new_version
+			json_tool.new_file_path_directory = File.ends_with_slash(local_json_info.get_base_dir())
 			json_tool.new_file_path = local_json_info
 			
 			print("AppTool | Generating new JSON lib.json information file...")

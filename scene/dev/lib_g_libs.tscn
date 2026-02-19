@@ -7,15 +7,15 @@
 [node name="ToolNode" parent="." unique_id=675606084 instance=ExtResource("1_rd73a")]
 
 [node name="TimeTool" parent="ToolNode" index="3" unique_id=1619197453]
-date_time_stamp = "feb-11-2026-10pm-18-41s-cst"
+date_time_stamp = "feb-18-2026-0am-37-21s-cst"
 
 [node name="JsonTool" parent="ToolNode" index="4" unique_id=1412259197 node_paths=PackedStringArray("time_tool_node")]
 time_tool_node = NodePath("../TimeTool")
 example_lib_json_file = "C:/Files/github/gamma_work/opul/opul_godot/lib/g_libs/g_tools/example_lib.json"
-date_lib_created = "feb-11-2026-10pm-18-41s-cst"
+date_lib_created = "feb-18-2026-0am-37-21s-cst"
 lib_last_update = "feb-3-2026-9pm-28-22s-cst"
 example_version_json_file = "C:/Files/github/gamma_work/opul/opul_godot/lib/g_libs/g_tools/example_version.json"
-date_app_created = "feb-11-2026-10pm-18-41s-cst"
+date_app_created = "feb-18-2026-0am-37-21s-cst"
 app_last_update = "feb-3-2026-9pm-28-22s-cst"
 
 [node name="AppTool" parent="ToolNode" index="5" unique_id=577520189 node_paths=PackedStringArray("json_tool_node")]
@@ -25,8 +25,8 @@ project_root = ""
 godot_project_root = ""
 project_name = "g_libs"
 version_status = 2
-current_version = "1.2.7"
-new_version = "1.2.7"
+current_version = "1.2.8"
+new_version = "1.2.8"
 project_type = 1
 local_json_info = "res://lib/g_libs/lib.json"
 json_info = ""

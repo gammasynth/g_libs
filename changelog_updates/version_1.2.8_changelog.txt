@@ -1,0 +1,13 @@
+---
+
+version 1.2.8 release
+feb-18-2026-0am-37-19s-cst
+
+- added new_file_path_directory String @export_global_dir member to JsonTool class
+- added touch String @export member to JsonTool class
+
+- added getter function to new_file_path to use new_file_path_directory + touch if empty in JsonTool class
+
+
+- AppTool.startup_project() function sets JsonTool.new_file_path_directory when setting JsonTool.new_file_path in AppTool class
+

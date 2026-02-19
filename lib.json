@@ -2,7 +2,7 @@
     "lib": {
         "name": "g_libs",
         "type": "godot",
-        "version": "1.2.7",
+        "version": "1.2.8",
         "date_created": "jan-28-2025",
         "source": "https://github.com/gammasynth/g_libs",
         "origin": "https://github.com/gammasynth/g_libs/archive/refs/heads/main.zip",
@@ -18,6 +18,6 @@
         "add_to_global_environment_path": false,
         "post_install_executable_path": "",
         "build": "release",
-        "latest_update": "feb-11-2026-8pm-54-33s-cst"
+        "latest_update": "feb-18-2026-0am-37-19s-cst"
     }
 }

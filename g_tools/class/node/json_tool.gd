@@ -26,7 +26,13 @@ extends Node
 class_name JsonTool
 
 @export_category("File Generation")
-@export_global_file() var new_file_path:String = ""
+@export_global_dir() var new_file_path_directory:String = ""
+@export var touch: String = ""
+@export_global_file() var new_file_path:String = "":
+	get:
+		if new_file_path.is_empty():
+			new_file_path = str(new_file_path_directory + touch)
+		return new_file_path
 
 @export_category("Timestamping")
 @export var time_tool_node: TimeTool = null
