@@ -1,0 +1,7 @@
+---
+
+version 1.2.13 release
+feb-24-2026-1am-20-8s-cst
+
+- fixed format_size_case function in Text.gd
+- implemented meridian_sizecase, timezone_sizecase parameters into stamp and stamp_time functions in Timestamp class

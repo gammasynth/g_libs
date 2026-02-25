@@ -1,0 +1,6 @@
+---
+
+version 1.2.12 release
+feb-23-2026-11pm-29-37s-cst
+
+- bugfix Timestamp.stamp_date sizecase

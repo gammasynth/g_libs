@@ -35,11 +35,10 @@ const COLOR_NAMES: Array[String] = ["black", "red", "green", "yellow", "blue", "
 ## Returns the given [param string] argument formatted to the given [param sizecase]. [br] [br] [br]
 ## See [method String.to_lower], [method String.to_upper], [method String.capitalize], [method String.to_pascal_case] for more information.
 static func format_size_case(string:String, sizecase:SizeCases) -> String:
-	match sizecase:
-		Text.SizeCases.Lower: string = string.to_lower()
-		Text.SizeCases.Upper: string = string.to_upper()
-		Text.SizeCases.Title: string = string.capitalize()
-		Text.SizeCases.Pascal: string = string.to_pascal_case()
+	if sizecase as SizeCases == SizeCases.Lower: return string.to_lower()
+	if sizecase as SizeCases == SizeCases.Upper: return string.to_upper()
+	if sizecase as SizeCases == SizeCases.Title: return string.capitalize()
+	if sizecase as SizeCases == SizeCases.Pascal: return string.to_pascal_case()
 	return string
 
 ## Returns a String with the corresponding symbol or combination of characters for the given [param case]. [br] [br]

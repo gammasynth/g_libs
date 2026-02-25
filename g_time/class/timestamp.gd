@@ -35,9 +35,9 @@ enum TimeTypes {Second, Minute, Hour}
 ## Use a different [member DateTimeFormats] for the [param date_time_format] if you don't want the date-time format. (ex: time-date) [br] [br] [br]
 ## This is simply a function for calling both methods [method stamp_date] and [method stamp_time], at the same time, for a single combined String. [br] [br]
 ## See documentation for the [method stamp_date] and [method stamp_time] methods for more information.
-static func stamp(date_time_format:DateTimeFormats=DateTimeFormats.DT, separate_date_time:bool=true, date_format:DateFormats=DateFormats.MDY, use_month_string:bool=true, abbreviate_month:int=3, time_format:TimeFormats=TimeFormats.HMS, append_timezone_name:bool=false, stringcase:Text.StringCases=Text.StringCases.Kebab, use_utc_time:bool=true, use_string_identifiers:Array[TimeTypes]=[], string_identifiers_length:int=-1, space_string_identifiers:bool=true, separate_string_identifiers:bool=false, use_military_time:bool=false, sizecase:Text.SizeCases=Text.SizeCases.Lower, time:Dictionary = Time.get_time_dict_from_system(use_utc_time), date:Dictionary = Time.get_date_dict_from_system(use_utc_time)) -> String:
+static func stamp(date_time_format:DateTimeFormats=DateTimeFormats.DT, separate_date_time:bool=true, date_format:DateFormats=DateFormats.MDY, use_month_string:bool=true, abbreviate_month:int=3, time_format:TimeFormats=TimeFormats.HMS, append_timezone_name:bool=false, stringcase:Text.StringCases=Text.StringCases.Kebab, use_utc_time:bool=true, use_string_identifiers:Array[TimeTypes]=[], string_identifiers_length:int=-1, space_string_identifiers:bool=true, separate_string_identifiers:bool=false, use_military_time:bool=false, sizecase:Text.SizeCases=Text.SizeCases.Lower, identifier_sizecase:Text.SizeCases=sizecase, meridian_sizecase:Text.SizeCases=sizecase, timezone_sizecase:Text.SizeCases=sizecase, time:Dictionary = Time.get_time_dict_from_system(use_utc_time), date:Dictionary = Time.get_date_dict_from_system(use_utc_time)) -> String:
 	var datestamp:String = stamp_date(date_format, stringcase, use_utc_time, use_month_string, abbreviate_month, sizecase, date)
-	var timestamp:String = stamp_time(time_format, append_timezone_name, stringcase, use_utc_time, use_string_identifiers, string_identifiers_length, space_string_identifiers, separate_string_identifiers, use_military_time, sizecase, time)
+	var timestamp:String = stamp_time(time_format, append_timezone_name, stringcase, use_utc_time, use_string_identifiers, string_identifiers_length, space_string_identifiers, separate_string_identifiers, use_military_time, sizecase, identifier_sizecase, meridian_sizecase, timezone_sizecase, time)
 	
 	var datetimestamp:String = ""
 	var separator:String = ""; if separate_date_time: separator = Text.get_case_separator(stringcase)
@@ -60,7 +60,7 @@ static func stamp(date_time_format:DateTimeFormats=DateTimeFormats.DT, separate_
 ## If you are using a custom [param time] Dictionary argument, consider/keep in mind that the [param append_timezone_name] argument being true will append what is returned from [method Time.get_time_zone_from_system].
 ##
 ## See the documentation of the [method Time.get_time_dict_from_system] method for usage of the [param use_utc_time] argument.
-static func stamp_time(time_format:TimeFormats=TimeFormats.HMS, append_timezone_name:bool=false, stringcase:Text.StringCases=Text.StringCases.Kebab, use_utc_time:bool=false, use_string_identifiers:Array[TimeTypes]=[], string_identifiers_length:int=-1, space_string_identifiers:bool=true, separate_string_identifiers:bool=false, use_military_time:bool=false, sizecase:Text.SizeCases=Text.SizeCases.Lower, time:Dictionary = Time.get_time_dict_from_system(use_utc_time)) -> String:
+static func stamp_time(time_format:TimeFormats=TimeFormats.HMS, append_timezone_name:bool=false, stringcase:Text.StringCases=Text.StringCases.Kebab, use_utc_time:bool=false, use_string_identifiers:Array[TimeTypes]=[], string_identifiers_length:int=-1, space_string_identifiers:bool=true, separate_string_identifiers:bool=false, use_military_time:bool=false, sizecase:Text.SizeCases=Text.SizeCases.Lower, identifier_sizecase:Text.SizeCases=sizecase, meridian_sizecase:Text.SizeCases=sizecase, timezone_sizecase:Text.SizeCases=sizecase, time:Dictionary = Time.get_time_dict_from_system(use_utc_time)) -> String:
 	# hour, minute, and second
 	
 	var hour: int = time.get("hour")
@@ -78,7 +78,7 @@ static func stamp_time(time_format:TimeFormats=TimeFormats.HMS, append_timezone_
 			if hour == 12: hour_string = str(hour)
 			else: hour_string = str(hour - 12)
 		else: meridian = "am"
-		meridian = Text.format_size_case(meridian, sizecase)
+		meridian = Text.format_size_case(meridian, meridian_sizecase)
 	
 	var separator:String = Text.get_case_separator(stringcase)
 	
@@ -94,9 +94,9 @@ static func stamp_time(time_format:TimeFormats=TimeFormats.HMS, append_timezone_
 			m = m.substr(0, string_identifiers_length)
 			s = s.substr(0, string_identifiers_length)
 		
-		h = Text.format_size_case(h, sizecase)
-		m = Text.format_size_case(m, sizecase)
-		s = Text.format_size_case(s, sizecase)
+		h = Text.format_size_case(h, identifier_sizecase)
+		m = Text.format_size_case(m, identifier_sizecase)
+		s = Text.format_size_case(s, identifier_sizecase)
 		if space_string_identifiers:
 			h = str(" " + h)
 			m = str(" " + m)
@@ -114,13 +114,13 @@ static func stamp_time(time_format:TimeFormats=TimeFormats.HMS, append_timezone_
 	
 	var tz:String = ""
 	if append_timezone_name: 
-		tz = Text.acronym(Time.get_time_zone_from_system().get("name"), Text.StringCases.Space, -1, sizecase)
+		tz = Text.acronym(Time.get_time_zone_from_system().get("name"), Text.StringCases.Space, -1, timezone_sizecase)
 		tz = str(separator + tz)
-		if not tz.right(1).containsn("t"): tz = Text.format_size_case(str(tz + "t"), sizecase)
+		if not tz.right(1).containsn("t"): tz = Text.format_size_case(str(tz + "t"), timezone_sizecase)
 	
 	var timestamp:String = ""
 	match time_format:
-		TimeFormats.HMS: timestamp = str(hour_string, h, meridian, separator, minute_string, m, separator, second_string, s, tz)
+		TimeFormats.HMS: timestamp = str(hour_string, h, ":", minute_string, m, meridian, separator, "(", second_string, s, ")", tz)
 		TimeFormats.SMH: timestamp = str(second_string, s, separator, minute_string, m, separator, hour_string, h, meridian, tz)
 		TimeFormats.HM: timestamp = str(hour_string, h, meridian, separator, minute_string, m, tz)
 		TimeFormats.MH: timestamp = str(minute_string, m, separator, hour_string, h, meridian, tz)
@@ -150,7 +150,7 @@ static func stamp_date(date_format:DateFormats=DateFormats.MDY, stringcase:Text.
 	var month:String = Calendar.Months.keys().get(month_num - 1)
 	
 	if use_month_string:
-		if abbreviate_month: month = month.substr(0, 3)
+		if abbreviate_month != 0: month = month.substr(0, abbreviate_month)
 		month = Text.format_size_case(month, sizecase)
 	else:
 		month = str(month_num)
@@ -163,4 +163,6 @@ static func stamp_date(date_format:DateFormats=DateFormats.MDY, stringcase:Text.
 		DateFormats.YDM: datestamp = str(year, separator, day, separator, month)
 		DateFormats.DMY: datestamp = str(day, separator, month, separator,  year)
 		DateFormats.YMD: datestamp = str(year, separator, month, separator, day)
+	
+	datestamp = Text.format_size_case(datestamp, sizecase)
 	return datestamp

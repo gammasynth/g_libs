@@ -1,0 +1,9 @@
+---
+
+version 1.2.10 release
+feb-23-2026-11pm-11-30s-cst
+
+- implemented VersionManager class in res://lib/g_libs/g_make/class/format/version_manager.gd
+
+- added Differences enumeration to VersionManager class
+- added chop_dot String, version_dictionary Dictionary, version_comparison Differences, and is_version_newer bool static methods in VersionManager class
