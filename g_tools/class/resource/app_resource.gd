@@ -1,3 +1,25 @@
+#|*******************************************************************
+# app_resource.gd
+#*******************************************************************
+# This file is part of g_libs.
+# 
+# g_libs is an open-source software library.
+# g_libs is licensed under the MIT license.
+# 
+# https://github.com/gammasynth/g_libs
+#*******************************************************************
+# Copyright (c) 2025 AD - present; 1447 AH - present, Gammasynth.  
+# Gammasynth (Gammasynth Software), Texas, U.S.A.
+# 
+# This software is licensed under the MIT license.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# 
+#|*******************************************************************
 @tool
 extends Resource
 class_name AppResource
@@ -6,7 +28,7 @@ var node:Node = null
 
 @export_category("App Version")
 enum StatusTypes {alpha, beta, release}
-enum CodeTypes {none, library, application}
+enum CodeTypes {none, library, application, plugin}
 
 var json_tool_node : JsonTool
 @export var project_is_godot_editor : bool = false
@@ -155,8 +177,11 @@ func startup_project() -> void:
 		if uses_local_updates_path: print(str("AppTool | Validated updates_info_file_path changelog updates directory: " + local_updates_info_file_path))
 		else: print(str("AppTool | Validated updates_info_file_path changelog updates directory: " + updates_info_file_path))
 		
-	elif project_type == CodeTypes.library:
-		print("AppTool | Starting new Library project...")
+	elif project_type == CodeTypes.library or project_type == CodeTypes.plugin:
+		if project_type == CodeTypes.plugin:
+			print("AppTool | Starting new Library project for Godot Plugin...")
+		else:
+			print("AppTool | Starting new Library project...")
 		
 		print("AppTool | Validating Library setup...")
 		json_info = ""
@@ -249,7 +274,7 @@ func get_project_root() -> String:
 		if not project_root.is_empty() and root != project_root: 
 			root = project_root
 			
-	elif project_type == CodeTypes.library:
+	elif project_type == CodeTypes.library or project_type == CodeTypes.plugin:
 		if not local_project_root.is_empty() and root != local_project_root: root = local_project_root
 	
 	if root == local_project_root: print("AppTool | get_project_root | This project is using local_project_root!")
@@ -349,7 +374,7 @@ func add_commit_to_changelog() -> void:
 			print("AppTool | Updating JSON (lib/version) information...")
 			var dict:Dictionary = File.load_dict_file(json_path)
 			var json_dict: Dictionary = dict
-			if project_type == CodeTypes.library:
+			if project_type == CodeTypes.library or project_type == CodeTypes.plugin:
 				if dict.has("lib"): json_dict = dict.get("lib")
 			
 			json_dict.set("version", new_version)
@@ -357,7 +382,7 @@ func add_commit_to_changelog() -> void:
 			if json_tool_node: json_dict.set("latest_update", json_tool_node.current_date_time_stamp)
 			else: json_dict.set("latest_update", Timestamp.stamp())
 			
-			if project_type == CodeTypes.library:
+			if project_type == CodeTypes.library or project_type == CodeTypes.plugin:
 				dict.set("lib", json_dict)
 			
 			var err:Error = File.save_dict_file(dict, json_path)
@@ -370,7 +395,34 @@ func add_commit_to_changelog() -> void:
 	update_description = ""
 	current_version = new_version
 	
+	if project_type == CodeTypes.plugin: update_plugin_cfg()
+	
 	print("AppTool | Finished writing version update changelogs!")
+
+func update_plugin_cfg() -> void:
+	print("AppTool | Writing version update to plugin.cfg...")
+	var completed_cfg_update:bool = false
+	var cfg_file:String = str(get_project_root() + "plugin.cfg")
+	if not FileAccess.file_exists(cfg_file): print("AppTool | Error! Can't find a valid plugin.cfg file for Plugin! Skipping...")
+	else:
+		var cfg:String = File.load_text_file(cfg_file)
+		
+		var k:String = "version="
+		var kl:int = k.length()
+		var vl:int = "0.0.0".length()
+		
+		var vidx:int = cfg.find(k) + kl + 1
+		
+		var cfg1:String = cfg.substr(0, vidx)
+		var cfg2:String = cfg.substr(vidx + vl)
+		
+		var ucfg:String = str(cfg1 + new_version + cfg2)
+		
+		var err:Error = File.save_text_file(ucfg, cfg_file)
+		if err != OK: print("AppTool | Error during saving plugin.cfg file for Plugin! Skipping...")
+		else: completed_cfg_update = true
+	
+	if completed_cfg_update: print("AppTool | Finished writing version update to plugin.cfg file for Plugin!")
 
 func write_update_info_to_file(file:FileAccess) -> void:
 	file.store_line("---")

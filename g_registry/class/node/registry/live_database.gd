@@ -24,6 +24,7 @@
 
 
 
+
 extends DatabaseNode
 
 ## LiveDatabase is an extension of DatabaseNode, that can load data from files at runtime.

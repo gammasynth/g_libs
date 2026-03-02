@@ -20,6 +20,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # 
 #|*******************************************************************
+
 @tool
 extends Node
 class_name AppTool
@@ -34,6 +35,10 @@ class_name AppTool
 
 func startup_project() -> void:
 	app_resource.node = self
+	app_resource.json_tool_node = json_tool_node
 	app_resource.startup_project()
 
-func update_project() -> void: app_resource.update_app()
+func update_project() -> void: 
+	app_resource.node = self
+	app_resource.json_tool_node = json_tool_node
+	app_resource.update_app()

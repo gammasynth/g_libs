@@ -24,6 +24,7 @@
 
 
 
+
 extends RegistryModdable
 
 class_name RegistryStack

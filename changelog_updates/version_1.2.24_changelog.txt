@@ -1,0 +1,11 @@
+---
+
+version 1.2.24 release
+mar-2-2026-3:59pm-(49s)-cst
+
+- added plugin to CodeTypes enumeration in AppResource class
+- implemented new plugin CodeTypes type in startup_project, get_project_root, add_commit_to_changelog functions in AppResource class
+
+- implemented update_plugin_cfg void method to AppResource class
+- implemented calling update_plugin_cfg method within add_commit_to_changelog function if project_type is CodeTypes.plugin in AppResource class
+

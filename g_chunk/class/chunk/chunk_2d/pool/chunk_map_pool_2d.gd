@@ -24,6 +24,7 @@
 
 
 
+
 extends ChunkMapPool
 
 class_name ChunkMapPool2D

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="AppResource" format=3 uid="uid://dh6xu0k1ccj5w"]
+
+[ext_resource type="Script" uid="uid://clvu1th6yt1qg" path="res://lib/g_libs/g_tools/class/resource/app_resource.gd" id="1_xtohe"]
+
+[resource]
+script = ExtResource("1_xtohe")
+local_project_root = "res://lib/g_libs"
+project_root = ""
+godot_project_root = ""
+project_name = "g_libs"
+version_status = 2
+current_version = "1.3.1"
+new_version = "1.3.1"
+project_type = 1
+started_project = true
+local_json_info = "res://lib/g_libs/lib.json"
+json_info = ""
+local_updates_info_file_path = "res://lib/g_libs/changelog_updates"
+local_changelog = "res://lib/g_libs/changelog.txt"
+versions_manifest = "C:/Files/github/gamma_work/software/versions_manifest.json"

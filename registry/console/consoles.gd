@@ -24,6 +24,7 @@
 
 
 
+
 extends Registry
 
 func _gather_subregistry_paths() -> Error:

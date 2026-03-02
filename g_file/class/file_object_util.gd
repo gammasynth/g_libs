@@ -24,6 +24,7 @@
 
 
 
+
 class_name FileObjectUtil
 
 static var current_dictionary: Dictionary = {}

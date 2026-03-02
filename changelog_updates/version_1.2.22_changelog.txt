@@ -1,0 +1,7 @@
+---
+
+version 1.2.22 release
+mar-2-2026-2:58am-(39s)-cst
+
+- fixed timestamping in changelogs
+- batch copyright files

@@ -24,6 +24,7 @@
 
 
 
+
 extends AStarGridNav
 
 class_name AStarPixelGridNav

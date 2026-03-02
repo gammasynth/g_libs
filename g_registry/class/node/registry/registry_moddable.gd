@@ -24,6 +24,7 @@
 
 
 
+
 extends RegistryBase
 
 class_name RegistryModdable

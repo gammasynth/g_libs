@@ -1,24 +1,7 @@
 [gd_scene format=3 uid="uid://tjws1n6kiy2l"]
 
 [ext_resource type="PackedScene" uid="uid://bi888t1r21bnb" path="res://lib/g_libs/g_tools/scene/tool_node.tscn" id="1_rd73a"]
-[ext_resource type="Script" uid="uid://clvu1th6yt1qg" path="res://lib/g_libs/g_tools/class/resource/app_resource.gd" id="2_ch44x"]
-
-[sub_resource type="Resource" id="Resource_4tvt7"]
-script = ExtResource("2_ch44x")
-local_project_root = "res://lib/g_libs"
-project_root = ""
-godot_project_root = ""
-project_name = "g_libs"
-version_status = 2
-current_version = "1.2.18"
-new_version = "1.2.18"
-project_type = 1
-started_project = true
-local_json_info = "res://lib/g_libs/lib.json"
-json_info = ""
-local_updates_info_file_path = "res://lib/g_libs/changelog_updates"
-local_changelog = "res://lib/g_libs/changelog.txt"
-versions_manifest = "C:/Files/github/gamma_work/software/versions_manifest.json"
+[ext_resource type="Resource" uid="uid://dh6xu0k1ccj5w" path="res://lib/g_libs/resource/lib_g_libs.tres" id="2_ch44x"]
 
 [node name="lib_g_libs" type="Node" unique_id=1447211933]
 
@@ -41,17 +24,19 @@ name_licensed_files = true
 license_files = true
 
 [node name="TimeTool" parent="ToolNode" index="3" unique_id=1619197453]
-date_time_stamp = "mar-2-2026-2:48am-(17s)-cst"
+date_time_stamp = "mar-2-2026-3:59pm-(36s)-cst"
 
-[node name="JsonTool" parent="ToolNode" index="4" unique_id=1412259197]
+[node name="JsonTool" parent="ToolNode" index="4" unique_id=1412259197 node_paths=PackedStringArray("time_tool_node")]
+time_tool_node = NodePath("../TimeTool")
 example_lib_json_file = "C:/Files/github/gamma_work/BrewBolt/brewbolt_godot/lib/g_libs/g_tools/example_lib.json"
-date_lib_created = "mar-2-2026-2:48am-(17s)-cst"
+date_lib_created = "mar-2-2026-3:59pm-(36s)-cst"
 lib_last_update = "mar-2-2026-2:38am-(4s)-cst"
 example_version_json_file = "C:/Files/github/gamma_work/BrewBolt/brewbolt_godot/lib/g_libs/g_tools/example_version.json"
-date_app_created = "mar-2-2026-2:48am-(17s)-cst"
+date_app_created = "mar-2-2026-3:59pm-(36s)-cst"
 app_last_update = "mar-2-2026-2:38am-(4s)-cst"
 
-[node name="AppTool" parent="ToolNode" index="5" unique_id=577520189]
-app_resource = SubResource("Resource_4tvt7")
+[node name="AppTool" parent="ToolNode" index="5" unique_id=577520189 node_paths=PackedStringArray("json_tool_node")]
+json_tool_node = NodePath("../JsonTool")
+app_resource = ExtResource("2_ch44x")
 
 [editable path="ToolNode"]

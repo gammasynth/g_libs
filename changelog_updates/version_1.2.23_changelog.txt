@@ -1,0 +1,7 @@
+---
+
+version 1.2.23 release
+mar-2-2026-3:14am-(21s)-cst
+
+saved lib_g_libs AppResource from lib_g_libs scene as file @
+res://lib/g_libs/resource/lib_g_libs.tres

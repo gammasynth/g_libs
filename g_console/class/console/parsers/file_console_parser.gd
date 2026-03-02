@@ -24,6 +24,7 @@
 
 
 
+
 extends ConsoleParser
 
 class_name FileConsoleParser
