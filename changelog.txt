@@ -2,6 +2,12 @@ g_libs | version changelog
 ___
 ---
 
+version 1.2.19 release
+---
+
+version 1.2.18 release
+---
+
 version 1.2.17 release
 feb-24-2026-1:30am-(8s)-cst
 
