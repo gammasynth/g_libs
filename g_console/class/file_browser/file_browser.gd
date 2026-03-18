@@ -355,7 +355,6 @@ func remove_item(item:FileItem, backup:bool=true, hard:bool=false) -> FileItem:
 # - - -
 
 #region Favoriting Paths
-
 func has_favorite(file_path:String) -> bool: return favorites.values().has(file_path)
 
 func toggle_favorite(file_path:String, toggle:Variant=null) -> void: 
